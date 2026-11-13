@@ -3842,11 +3842,6 @@ function screenTerms() {
   return h("div", { class: "card" },
     h("h1", { id: "screen-heading", tabindex: "-1" }, TERMS.title),
     TERMS.paragraphs.map(function (p) { return h("p", {}, p); }),
-    h("h2", {}, TERMS.codeOfConductTitle),
-    h("p", {}, TERMS.codeOfConductIntro),
-    h("ul", { class: "conduct-list" }, CODE_OF_CONDUCT.map(function (item) {
-      return h("li", { class: "conduct-item" }, h("strong", {}, item.title), h("p", {}, item.text));
-    })),
     h("h2", {}, TERMS.assignmentRuleTitle),
     h("div", { class: "rule" }, h("p", {}, TERMS.assignmentRule)),
     checkRow,
