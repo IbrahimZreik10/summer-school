@@ -1,0 +1,89 @@
++function supabaseBase(client) {
++  const TABLES = {
++    students: { table: "students", key: "user_id" },
++    site: { table: "site", key: "id" },
++    chats: { table: "staff_chats", key: "user_id" },
++  };
++  function where(path) {
++    const s = path.split("/");
++    if (s[0] === "students") return { t: TABLES.students, id: s[1] };
++    if (s[0] === "shared") return { t: TABLES.site, id: s[1] };
++    if (s[0] === "data" && s[3] === "chats") return { t: TABLES.chats, id: s[2] };
++    throw new TypeError("No table for " + path);
++  }
++  function iso(value) { const d = new Date(value); return isNaN(d.getTime()) ? "" : d.toISOString(); }
++  function toRow(w, body) {
++    if (w.t === TABLES.students) {
++      return { user_id: w.id, username: body.username, created_at: body.createdAt || new Date().toISOString(),
++        updated_at: body.updatedAt, state: body.state || {}, events: body.events || [] };
++    }
++    if (w.t === TABLES.site) return { id: w.id, data: body, updated_at: body.updatedAt };
++    return { user_id: w.id, chats: body.chats || {} };
++  }
++  function fromRow(w, row) {
++    if (w.t === TABLES.students) {
++      return { username: row.username, createdAt: iso(row.created_at), updatedAt: iso(row.updated_at), state: row.state || {}, events: row.events || [] };
++    }
++    if (w.t === TABLES.site) return row.data || {};
++    return { chats: row.chats || {} };
++  }
++  // Turns a Supabase error into one of the codes the saving code understands.
++  function failure(error) {
++    const code = String((error && error.code) || "");
++    const status = error && error.status;
++    const message = (error && error.message) || "";
++    if (code === "42501" || status === 401 || status === 403) return { code: "invalid_argument", message: message };
++    if (code === "42P01" || /^PGRST20[2-5]$/.test(code)) return { code: "setup", message: message };
++    return { code: "unavailable", message: message };
++  }
++  function snapshot(id, body) {
++    return { id: id, exists: !!body, data: function () { return body ? JSON.parse(JSON.stringify(body)) : undefined; },
++      metadata: { fromCache: false, hasPendingWrites: false } };
++  }
++  // Reads again whenever the table changes (live updates), and every 30 seconds
++  // as a back-up in case live updates are switched off in Supabase.
++  function watch(table, filter, read) {
++    let timer = null;
++    const soon = function () { window.clearTimeout(timer); timer = window.setTimeout(read, 250); };
++    const options = { event: "*", schema: "public", table: table };
++    if (filter) options.filter = filter;
++    let channel = null;
++    try {
++      channel = client.channel("ssic-" + table + "-" + Math.random().toString(36).slice(2)).on("postgres_changes", options, soon).subscribe();
++    } catch (error) { channel = null; }
++    const poll = window.setInterval(function () { if (!document.hidden) read(); }, 30000);
++    read();
++    return function () {
++      window.clearInterval(poll);
++      window.clearTimeout(timer);
++      if (channel) { try { client.removeChannel(channel); } catch (error) { /* already closed */ } }
++    };
++  }
++  function listen(table, filter, query, deliver, fail) {
++    let stopped = false;
++    let stop = function () {};
++    stop = watch(table, filter, function () {
++      query().then(function (result) {
++        if (stopped) return;
++        if (result.error) {
++          const f = failure(result.error);
++          if (f.code === "unavailable") return;   // a hiccup: the next read tries again
++          stopped = true;
++          stop();
++          if (fail) fail(f);
++          return;
++        }
++        deliver(result.data);
++      }, function () { /* offline: the next read tries again */ });
++    });
++    return function () { stopped = true; stop(); };
++  }
++  function doc(path) {
++    const w = where(path);
++    return {
++      path: path,
++      set: function (body) {
++        return client.from(w.t.table).upsert(toRow(w, body)).then(function (result) {
++          if (result.error) throw failure(result.error);
++        }, function (error) { throw { code: "unavailable", message: String(error && error.message || error) }; });
++      },
