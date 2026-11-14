@@ -1,0 +1,94 @@
++    answer: function (t, ctx) {
++      if (!ctx.mine.length) return { text: TEXT.staff.assistant.noStudents };
++      const list = aSkillAverages(ctx.mine);
++      const strongFirst = aHas(t, ["strong", "best", "good at"]);
++      const ordered = strongFirst ? list.slice().reverse() : list;
++      const first = ordered[0];
++      const tip = !strongFirst && first ? (ASSISTANT_KNOWLEDGE.tips[first.skill.id] || [])[0] : null;
++      return { text: "Skill averages in your " + ctx.groupName + " group (" + ctx.mine.length + " students), " + (strongFirst ? "strongest" : "weakest") + " first:\n\n" +
++        aList(ordered.map(function (x) { return x.skill.name + ": " + aNum(x.average) + " / " + ctx.max; })) +
++        (tip ? "\n\nIdea for " + first.skill.name + ": " + tip : "") };
++    } },
++  { id: "compare", test: function (t) { return aHas(t, ["compare", "versus", " vs ", "difference between", "all groups", "each group", "every group", "breakdown", "distribution", "per group", "other groups"]); },
++    answer: function (t, ctx) {
++      const done = ctx.all.filter(function (r) { return r.completed && r.level; });
++      return { text: "All groups (students who finished the survey):\n\n" + aList(sortedLevels().map(function (level) {
++        const group = done.filter(function (r) { return r.level.id === level.id; });
++        const avg = mean(group.map(function (r) { return r.average; }));
++        return level.name + ": " + group.length + " student" + (group.length === 1 ? "" : "s") + (group.length ? ", average " + aNum(avg) + " / " + ctx.max : "");
++      })) + "\n\nGroups are set by the survey average: " + aThresholds() + "." };
++    } },
++  { id: "performance", test: function (t) { return aHas(t, ["average", "mean", "score", "perform", "doing", "result", "progress", "how is my", "how are my", "how is the", "how are the", "level of", "grades"]); },
++    answer: function (t, ctx) {
++      const level = aLevelIn(t);
++      if (!level && aSkillIn(t)) return ASSISTANT_INTENTS.find(function (i) { return i.id === "support"; }).answer(t, ctx);
++      const group = level ? ctx.all.filter(function (r) { return r.completed && r.level && r.level.id === level.id; }) : ctx.mine;
++      const name = level ? level.name : ctx.groupName;
++      if (!group.length) return { text: level ? "No students in the " + level.name + " group have finished the survey yet." : TEXT.staff.assistant.noStudents };
++      const skills = aSkillAverages(group);
++      const low = skills[0], high = skills[skills.length - 1];
++      const confirmed = group.filter(function (r) { return r.timetableConfirmed; }).length;
++      return { text: "The " + name + " group: " + group.length + " student" + (group.length === 1 ? "" : "s") + ", average " + aNum(mean(group.map(function (r) { return r.average; }))) + " / " + ctx.max + ".\n\n" +
++        aList([
++          "Strongest skill: " + high.skill.name + " (" + aNum(high.average) + ")",
++          "Skill to work on most: " + low.skill.name + " (" + aNum(low.average) + ")",
++          confirmed + " of " + group.length + " have confirmed their timetable",
++        ]) + "\n\nAsk “which skills are weakest?” or “who needs support?” for more detail." };
++    } },
++  { id: "roster", test: function (t) { return /( list (of )?(my |all |the )?students| show (me )?(my |all |the )?students|student list|class list|roster| whos in | who is in | who are in | names of |students in my|who (chose|picked)|my students $)/.test(t); },
++    answer: function (t, ctx) {
++      const m = /(\d{1,2})[:.](\d{2})/.exec(t);
++      if (m) {
++        const wanted = (m[1].length === 1 ? "0" : "") + m[1] + ":" + m[2];
++        const course = ctx.courses.find(function (c) { return c.times.indexOf(wanted) !== -1; });
++        if (!course) return { text: "None of your classes starts at " + wanted + ". Ask “which times did students choose?” to see your class times." };
++        const index = course.times.indexOf(wanted);
++        const names = Object.keys(db.students).filter(function (email) { return aPicks(email)[course.id] === index; }).map(nameFromEmail);
++        return { text: course.name + ", " + dayName(course.day) + " at " + aSlotText(course, index) + ": " + names.length + " student" + (names.length === 1 ? "" : "s") + (names.length ? "\n\n" + aList(names) : ".") };
++      }
++      if (!ctx.mine.length) return { text: TEXT.staff.assistant.noStudents };
++      return { text: "Students in your " + ctx.groupName + " group (" + ctx.mine.length + "):\n\n" + aList(ctx.mine.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (r) {
++        return r.name + ": average " + aNum(r.average) + " / " + ctx.max + (r.timetableConfirmed ? "" : ", timetable not confirmed");
++      })) };
++    } },
++  { id: "count", test: function (t) { return aHas(t, ["how many", "number of", "count", "total", "class size", "signed up", "enrolled", "registered", "size of"]); },
++    answer: function (t, ctx) {
++      const done = ctx.all.filter(function (r) { return r.completed; }).length;
++      const confirmed = ctx.mine.filter(function (r) { return r.timetableConfirmed; }).length;
++      return { text: (ctx.mine.length ? "Your " + ctx.groupName + " group has " + ctx.mine.length + " student" + (ctx.mine.length === 1 ? "" : "s") + " who finished the survey (" + confirmed + " confirmed a timetable)." : "No students in your " + ctx.groupName + " group have finished the survey yet.") +
++        "\n\nAcross the whole summer school: " + ctx.all.length + " signed in, " + done + " finished the survey, " + (ctx.all.length - done) + " still in progress." };
++    } },
++  { id: "materials", test: function (t) { return aHas(t, ["material", "resource", "slides", "handbook", "canvas", "worksheet", "reading list", "documents", "files"]); },
++    answer: function (t, ctx) {
++      const ids = ctx.courses.map(function (c) { return c.id; });
++      const list = MATERIALS.filter(function (m) { return ctx.levels.some(function (l) { return includesLevel(m, l); }); })
++        .sort(function (a, b) { return (ids.indexOf(b.course) !== -1) - (ids.indexOf(a.course) !== -1); });
++      return { text: "Materials for your group:\n\n" + aList(list.map(function (m) { return m.title + " (" + m.type + ")" + (ids.indexOf(m.course) !== -1 ? ", for your course" : ""); })) +
++        (SITE.canvasUrl ? "\n\nEverything is also on Canvas: " + SITE.canvasUrl : "") };
++    } },
++  { id: "workshops", test: function (t) { return aHas(t, ["workshop", "extra class", "clinic", "optional class", "drop-in"]); },
++    answer: function (t, ctx) {
++      const list = WORKSHOPS.filter(function (w) { return ctx.levels.some(function (l) { return includesLevel(w, l); }); });
++      if (!list.length) return { text: "There are no extra classes listed for your group." };
++      return { text: "Extra classes for your " + ctx.groupName + " group:\n\n" + aList(list.map(function (w) {
++        const n = ctx.mine.filter(function (r) { return r.weakest[0] && r.weakest[0].skill.id === w.skill; }).length;
++        return "“" + w.title + "”: " + sessionWhen(w) + ", " + w.place + (n ? ". Recommended for " + n + " of your students" : "");
++      })) };
++    } },
++  { id: "nextclass", test: function (t) { return aHas(t, ["next class", "next lesson", "next session", "when is my next", "upcoming class", "do i teach today", "teaching today", "class today", "classes today", "tomorrow"]); },
++    answer: function (t, ctx) { return aNextClassAnswer(t, ctx); } },
++  { id: "timetable", test: function (t) { return aHas(t, ["timetable", "schedule", "slot", "when do i teach", "class times", "class time", "room", "where is my", "which time", "what time", "chose", "picked", "choose"]); },
++    answer: function (t, ctx) {
++      if (!ctx.courses.length) return { text: "You have no courses on the timetable yet." };
++      return { text: ctx.courses.map(function (c) {
++        return c.name + " (" + levelById(c.level).name + " group): " + dayName(c.day) + ", " + (c.room || TIMETABLE.defaultRoom) + "\n" +
++          aList(c.times.map(function (time, i) { const n = aPickedCount(c, i); return aSlotText(c, i) + ": " + n + " student" + (n === 1 ? "" : "s") + " chose this time"; }));
++      }).join("\n\n") + (TIMETABLE.classDaysTbc ? "\n\nThe class days are still provisional." : "") };
++    } },
++  { id: "mycourses", test: function (t) { return aHas(t, ["my course", "what do i teach", "which course", "my group", "which group", "what group", "my subject", "my classes", "my modules"]); },
++    answer: function (t, ctx) {
++      return { text: ctx.courses.length ? "You teach:\n\n" + aList(ctx.courses.map(function (c) { return c.name + " · " + levelById(c.level).name + " group · " + dayName(c.day); })) : "You have no courses on the timetable yet." };
++    } },
++  { id: "survey", test: function (t) { return aHas(t, ["survey", "placement", "how are groups", "how were groups", "groups decided", "levels decided", "threshold", "scale", "how groups", "how do groups"]); },
++    answer: function (t, ctx) {
++      const statements = SURVEY_SKILLS.reduce(function (n, s) { return n + s.statements.length; }, 0);
