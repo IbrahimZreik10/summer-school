@@ -2038,6 +2038,41 @@ const TEXT = {
     welcomeBackNotice: "Welcome back, {name}.",
   },
 
+  // Attendance: QR codes for professors, check-in messages for students (website version)
+  attendance: {
+    intro: "Start attendance for a class, then show the QR code on the screen. Students scan it with their phone camera and sign in with their university email. The code changes every {seconds} seconds, so a photo of it soon stops working.",
+    courseLine: "{level} group · {day}",
+    loading: "Loading attendance…",
+    noCourses: "You have no courses on the timetable yet.",
+    onlineOnly: "Attendance works on the online website, where students sign in with their university email.",
+    startButton: "Start attendance",
+    restartButton: "Start a new attendance",
+    endButton: "End attendance",
+    fullscreenButton: "Show full screen",
+    startedToast: "Attendance started for {course}. Show the QR code to your class.",
+    qrLabel: "Attendance QR code for {course}. It changes every few seconds.",
+    qrMissing: "The QR code could not be drawn. Check your internet connection and reload the page.",
+    changesIn: "New code in {seconds} s",
+    countLine: "{count} checked in",
+    endedNote: "attendance ended",
+    nobodyYet: "Nobody has checked in yet.",
+    errorSetup: "Attendance isn't set up in the database yet. The site owner needs to run supabase-setup.sql in Supabase (see SUPABASE-SETUP.md).",
+    errorStart: "Attendance couldn't start. Reload the page and try again.",
+    errorNetwork: "We couldn't reach the database. Check your internet connection and try again.",
+    student: {
+      signInFirst: "Sign in with your university email to finish checking in.",
+      checking: "Checking you in…",
+      done: "✓ Checked in: {course} with {professor} at {time}.",
+      already: "✓ You're already checked in: {course} with {professor} (since {time}).",
+      expired: "That QR code has already changed. Scan the code on the screen again.",
+      closed: "Attendance for this class has ended. Ask your professor.",
+      signin: "Sign in with your university email, then scan the code again.",
+      staff: "Professors don't need to check in.",
+      professor: "Professors don't need to check in.",
+      error: "We couldn't check you in. Scan the code on the screen again.",
+    },
+  },
+
   // The professor's staff console
   staff: {
     kicker: "Staff console",
@@ -2049,6 +2084,7 @@ const TEXT = {
     sections: {
       overview:    { menu: "Overview",        title: "Overview" },
       results:     { menu: "Student results", title: "Student results" },
+      attendance:  { menu: "Attendance",      title: "Attendance" },
       assignments: { menu: "Assignment board", title: "Assignment board" },
       console:     { menu: "AI & Staff Console", title: "AI & Staff Console" },
       assistant:   { menu: "My assistant",     title: "My assistant" },
@@ -2150,6 +2186,7 @@ const TEXT = {
         survey: "{user} finished the survey and joined the {detail} group",
         timetable: "{user} confirmed their timetable",
         assignment: "{user} listed “{detail}”",
+        checkin: "{user} checked in to {detail}",
       },
     },
     console: {
@@ -3051,6 +3088,250 @@ function handleWebSignIn() {
 }
 
 
+/* ---------- 2d. Attendance with moving QR codes (website version) ----------
+   Each professor has an Attendance page with one QR code per course.
+   The code inside the QR changes every ATTENDANCE.codeSeconds seconds, so a
+   photo of it stops working almost straight away. Students scan it with
+   their phone camera, sign in with their university email, and the site
+   checks them in. The check happens in the database (check_in in
+   supabase-setup.sql), so nobody can mark themselves present without a
+   fresh code. Professors see who checked in, live. */
+const ATTENDANCE = {
+  codeSeconds: 20,      // how often the QR code changes
+  refreshSeconds: 4,    // how often the professor's list of students updates
+};
+const att = { loaded: false, loading: false, sessions: {}, ended: {}, lists: {}, timer: null, error: "", checking: false };
+const CHECKIN_KEY = "pending-checkin";
+
+function attendanceSupported() { return webMode && online.on && !!online.client; }
+function onAttendancePage() {
+  if (!isProfessor()) return false;
+  let id = "";
+  try { id = decodeURIComponent((window.location.hash || "").slice(1)); } catch (error) { id = ""; }
+  return id === "staff-attendance";
+}
+function attWindow() { return Math.floor(Date.now() / 1000 / ATTENDANCE.codeSeconds); }
+// The code for one time window: the first 12 characters of HMAC-SHA256(secret, window).
+function attCode(secret, windowNo) {
+  const enc = new TextEncoder();
+  return window.crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+    .then(function (key) { return window.crypto.subtle.sign("HMAC", key, enc.encode(String(windowNo))); })
+    .then(function (sig) {
+      return Array.prototype.map.call(new Uint8Array(sig), function (b) { return b.toString(16).padStart(2, "0"); }).join("").slice(0, 12);
+    });
+}
+function attLink(sessionId, code) {
+  return window.location.origin + window.location.pathname + "#checkin=" + sessionId + "." + code;
+}
+function attQrSvg(text) {
+  if (typeof window.qrcode !== "function") return null;
+  const qr = window.qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
+}
+function attClock(iso) {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function attSessionIds() {
+  return Object.keys(att.sessions).map(function (k) { return att.sessions[k].id; })
+    .concat(Object.keys(att.ended).map(function (k) { return att.ended[k].id; }));
+}
+
+// Professor: load this professor's open attendance sessions.
+function attLoad() {
+  if (!attendanceSupported() || att.loading) return;
+  att.loading = true;
+  online.client.from("attendance_sessions").select("id, course_id, course_name, secret, started_at")
+    .eq("professor_user", online.uid).is("ended_at", null).order("started_at", { ascending: false })
+    .then(function (res) {
+      att.loading = false;
+      att.loaded = true;
+      if (res.error) {
+        att.error = TEXT.attendance.errorSetup;
+      } else {
+        att.error = "";
+        att.sessions = {};
+        (res.data || []).forEach(function (row) { if (!att.sessions[row.course_id]) att.sessions[row.course_id] = row; });
+      }
+      if (onAttendancePage()) render({ keepFocusScroll: true });
+      attPoll();
+    }, function () { att.loading = false; att.loaded = true; att.error = TEXT.attendance.errorNetwork; if (onAttendancePage()) render({ keepFocusScroll: true }); });
+}
+function attStart(course) {
+  const words = TEXT.attendance;
+  const prev = att.sessions[course.id];
+  const closing = prev
+    ? online.client.from("attendance_sessions").update({ ended_at: new Date().toISOString() }).eq("id", prev.id)
+    : Promise.resolve({});
+  Promise.resolve(closing).then(function () {
+    return online.client.from("attendance_sessions")
+      .insert({ professor_user: online.uid, professor_id: session.professorId, course_id: course.id, course_name: course.name })
+      .select("id, course_id, course_name, secret, started_at").single();
+  }).then(function (res) {
+    if (res.error) {
+      att.error = words.errorStart;
+    } else {
+      att.error = "";
+      att.sessions[course.id] = res.data;
+      delete att.ended[course.id];
+      att.lists[res.data.id] = [];
+      showToast(fill(words.startedToast, { course: course.name }));
+    }
+    render({ keepFocusScroll: true });
+  }, function () { att.error = words.errorNetwork; render({ keepFocusScroll: true }); });
+}
+function attEnd(course) {
+  const s = att.sessions[course.id];
+  if (!s) return;
+  online.client.from("attendance_sessions").update({ ended_at: new Date().toISOString() }).eq("id", s.id).then(function (res) {
+    if (res.error) { att.error = TEXT.attendance.errorNetwork; } else { att.ended[course.id] = s; delete att.sessions[course.id]; }
+    render({ keepFocusScroll: true });
+  });
+}
+// Professor: fetch who has checked in to the sessions on screen.
+function attPoll() {
+  if (!attendanceSupported() || !isProfessor()) return;
+  const ids = attSessionIds();
+  if (!ids.length) return;
+  online.client.from("attendance").select("session_id, email, checked_at").in("session_id", ids).order("checked_at", { ascending: true })
+    .then(function (res) {
+      if (res.error) return;
+      const lists = {};
+      ids.forEach(function (id) { lists[id] = []; });
+      (res.data || []).forEach(function (r) { (lists[r.session_id] = lists[r.session_id] || []).push(r); });
+      att.lists = lists;
+      attDrawLists();
+    }, function () { /* offline: try again on the next tick */ });
+}
+function attListItems(list) {
+  if (!list.length) return [h("li", { class: "muted" }, TEXT.attendance.nobodyYet)];
+  return list.map(function (r) {
+    return h("li", {}, h("span", {}, "✓ ", h("strong", {}, nameFromEmail(r.email)), " ", h("span", { class: "small muted" }, r.email)),
+      h("span", { class: "small muted" }, attClock(r.checked_at)));
+  });
+}
+function attDrawLists() {
+  Object.keys(att.sessions).concat(Object.keys(att.ended)).forEach(function (courseId) {
+    const s = att.sessions[courseId] || att.ended[courseId];
+    const list = att.lists[s.id] || [];
+    const count = document.getElementById("att-count-" + courseId);
+    const ul = document.getElementById("att-list-" + courseId);
+    if (count) count.textContent = fill(TEXT.attendance.countLine, { count: list.length });
+    if (ul) { ul.textContent = ""; addChildren(ul, attListItems(list)); }
+  });
+}
+// Every second: redraw any QR code whose time window has changed, and the countdown.
+function attTick() {
+  if (!onAttendancePage()) return;
+  const now = Math.floor(Date.now() / 1000);
+  const w = attWindow();
+  const left = ATTENDANCE.codeSeconds - (now % ATTENDANCE.codeSeconds);
+  Object.keys(att.sessions).forEach(function (courseId) {
+    const s = att.sessions[courseId];
+    const timer = document.getElementById("att-timer-" + courseId);
+    if (timer) timer.textContent = fill(TEXT.attendance.changesIn, { seconds: left });
+    const box = document.getElementById("att-qr-" + courseId);
+    if (!box || box.getAttribute("data-window") === String(w)) return;
+    box.setAttribute("data-window", String(w));
+    attCode(s.secret, w).then(function (code) {
+      const svg = attQrSvg(attLink(s.id, code));
+      if (svg) {
+        box.innerHTML = svg;
+        const el = box.querySelector("svg");
+        if (el) { el.setAttribute("width", "100%"); el.setAttribute("height", "100%"); el.setAttribute("aria-hidden", "true"); }
+      } else {
+        box.textContent = TEXT.attendance.qrMissing;
+      }
+    });
+  });
+  if (now % ATTENDANCE.refreshSeconds === 0) attPoll();
+}
+function attFullscreen(courseId) {
+  const box = document.getElementById("att-qr-" + courseId);
+  if (box && box.requestFullscreen) box.requestFullscreen().catch(function () { /* not allowed here */ });
+}
+
+// The professor's Attendance page.
+function staffAttendance(sec, ctx) {
+  const words = TEXT.attendance;
+  if (!attendanceSupported()) return sectionWrap(sec, null, h("p", { class: "notice notice-info" }, words.onlineOnly));
+  if (!att.loaded) attLoad();
+  if (!att.timer) att.timer = window.setInterval(attTick, 1000);
+  window.setTimeout(function () { attTick(); attDrawLists(); }, 0);
+  const courses = ctx.courses;
+  return sectionWrap(sec, null,
+    h("p", { class: "muted" }, fill(words.intro, { seconds: ATTENDANCE.codeSeconds })),
+    att.error ? h("p", { class: "notice notice-warning", role: "status" }, att.error) : null,
+    !att.loaded ? h("p", { class: "muted", role: "status" }, words.loading)
+      : (courses.length ? h("div", { class: "card-grid" }, courses.map(attCard)) : h("p", { class: "muted" }, words.noCourses))
+  );
+}
+function attCard(course) {
+  const words = TEXT.attendance;
+  const live = att.sessions[course.id];
+  const shown = live || att.ended[course.id];
+  const list = shown ? (att.lists[shown.id] || []) : [];
+  return h("article", { class: "mini-card", id: "att-card-" + course.id },
+    h("h3", {}, course.name),
+    h("p", { class: "small muted" }, fill(words.courseLine, { level: levelById(course.level).name, day: dayName(course.day) })),
+    live ? h("div", {},
+      h("div", { id: "att-qr-" + course.id, role: "img", "aria-label": fill(words.qrLabel, { course: course.name }),
+        style: "width:min(280px,100%);aspect-ratio:1;margin:12px auto 4px;background:#fff;border-radius:12px;padding:6px;box-sizing:border-box" }),
+      h("p", { class: "small muted", id: "att-timer-" + course.id, style: "text-align:center;margin:0 0 8px" }, ""),
+      h("div", { class: "actions" },
+        h("button", { type: "button", class: "btn btn-secondary btn-small", onClick: function () { attFullscreen(course.id); } }, words.fullscreenButton),
+        h("button", { type: "button", class: "btn btn-quiet btn-small", onClick: function () { attEnd(course); } }, words.endButton))
+    ) : h("div", { class: "actions" },
+      h("button", { type: "button", class: "btn btn-primary", onClick: function () { attStart(course); } }, shown ? words.restartButton : words.startButton)),
+    shown ? h("div", {},
+      h("p", { style: "margin:14px 0 4px" }, h("strong", { id: "att-count-" + course.id }, fill(words.countLine, { count: list.length })),
+        live ? null : h("span", { class: "small muted" }, " · " + words.endedNote)),
+      h("ul", { class: "row-list", id: "att-list-" + course.id }, attListItems(list))
+    ) : null
+  );
+}
+
+// Student: a scanned QR code opens the site at #checkin=<session>.<code>.
+function captureCheckin() {
+  const m = /^#checkin=([0-9a-f-]{36})\.([0-9a-f]{6,32})$/i.exec(window.location.hash || "");
+  if (!m) return false;
+  writeJson("sessionStorage", storageKey(CHECKIN_KEY), { session: m[1], code: m[2].toLowerCase(), at: Date.now() });
+  setHash("");
+  ui.checkin = { kind: "info", text: isStudent() ? TEXT.attendance.student.checking : TEXT.attendance.student.signInFirst };
+  if (!session) ui.loginOpen = true;
+  return true;
+}
+function tryCheckIn() {
+  const pending = readJson("sessionStorage", storageKey(CHECKIN_KEY));
+  if (!pending || att.checking) return;
+  if (!webMode || !online.client || !online.on || !online.greeted || !session) return;
+  const words = TEXT.attendance.student;
+  writeJson("sessionStorage", storageKey(CHECKIN_KEY), null);
+  if (isProfessor()) { ui.checkin = { kind: "warning", text: words.professor }; render({ focusId: "checkin-notice", scrollTop: true }); return; }
+  att.checking = true;
+  online.client.rpc("check_in", { p_session: pending.session, p_code: pending.code }).then(function (res) {
+    att.checking = false;
+    const out = (res && res.data) || {};
+    if (res.error) {
+      ui.checkin = { kind: "warning", text: words.error };
+    } else if (out.ok) {
+      const prof = findById(PROFESSORS, out.professor);
+      ui.checkin = { kind: "success", text: fill(out.already ? words.already : words.done, { course: out.course || "", professor: prof ? prof.name : "", time: attClock(out.at) }) };
+      if (!out.already) { logActivity("checkin", session.email, out.course || ""); save(); }
+    } else {
+      ui.checkin = { kind: "warning", text: words[out.reason] || words.error };
+    }
+    render({ focusId: "checkin-notice", scrollTop: true });
+  }, function () {
+    att.checking = false;
+    ui.checkin = { kind: "warning", text: words.error };
+    render({ focusId: "checkin-notice", scrollTop: true });
+  });
+}
+
+
 /* ---------- 3. Settings checks ----------
    Runs once when the page opens and prints warnings in the browser
    console (press F12, then open "Console") if something in PART 1 looks
@@ -3313,6 +3594,7 @@ function classesOnDay(levelId, day, picks) {
 function go(screen, focusId) {
   if (isStudent()) state.screen = screen;
   ui.signInNotice = "";
+  ui.checkin = null;
   save();
   render({ focusId: focusId || "screen-heading", scrollTop: true });
 }
@@ -3339,6 +3621,7 @@ function render(options) {
     cloudMode ? h("p", { class: "notice notice-warning", role: "status", id: "online-notice", hidden: !onlineNotice() }, onlineNotice() || "")
       : (storage.available ? null : h("p", { class: "notice notice-warning", role: "status" }, TEXT.storageWarning)),
     ui.signInNotice ? h("p", { class: "notice notice-success", role: "status", id: "signin-notice" }, ui.signInNotice) : null,
+    ui.checkin ? h("p", { class: "notice notice-" + ui.checkin.kind, role: "status", id: "checkin-notice", tabindex: "-1" }, ui.checkin.text) : null,
     isPortal || isStaff || editing ? null : stepIndicator(JOURNEY_STEP[screen]),
     buildScreen(screen, result, sections, page)
   ));
@@ -5001,7 +5284,7 @@ function sectionExtra(sec, entry) {
 
 /* ---------- 8b. Staff console (professors) ---------- */
 function staffSections() {
-  const builders = { overview: staffOverview, results: staffResults, assignments: staffAssignments, console: staffConsole, assistant: staffAssistant };
+  const builders = { overview: staffOverview, results: staffResults, attendance: staffAttendance, assignments: staffAssignments, console: staffConsole, assistant: staffAssistant };
   return Object.keys(builders).map(function (key) {
     const words = TEXT.staff.sections[key];
     // The overview sits under the page's own welcome heading, so it is a sub-section.
@@ -5829,9 +6112,12 @@ function start() {
   checkConfig();
   setFavicon();
   setupMotion();
+  captureCheckin();   // opened from an attendance QR code
   startOnline();   // inside claude.ai: connect to the shared database (the page works before it answers)
   render({ scrollTop: true });
   window.addEventListener("hashchange", onPageChange);
+  window.addEventListener("hashchange", function () { if (captureCheckin()) render({ focusId: "checkin-notice", scrollTop: true }); });
+  window.setInterval(tryCheckIn, 1000);
   window.addEventListener("storage", onSharedChange);
   window.setInterval(refreshTimes, 30000);
   window.addEventListener("resize", function () { updateHeaderOffset(); updateActivePill(); });
@@ -5843,6 +6129,8 @@ else start();
 
 <!-- Supabase JS (MIT License): signs students in and saves their progress. https://github.com/supabase/supabase-js -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- QR code drawing for attendance (MIT License). https://github.com/kazuhikoarase/qrcode-generator -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 /* =====================================================================
    LIBRARIES (no need to edit)
