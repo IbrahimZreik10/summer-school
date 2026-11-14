@@ -1,0 +1,77 @@
++      return enterWeb(made.data.session.user, "account");
++    });
++  }).catch(function () { fail(ww.errorNetwork); });
++}
++
++
+ /* ---------- 3. Settings checks ----------
+    Runs once when the page opens and prints warnings in the browser
+    console (press F12, then open "Console") if something in PART 1 looks
+@@ -2841,7 +3143,7 @@
+ 
+   // Logins (inside claude.ai professors need no email or password: the page owner opens the staff pages)
+   const staffEmails = {};
+-  if (!hosted) PROFESSORS.forEach(function (p) {
++  if (!cloudMode) PROFESSORS.forEach(function (p) {
+     if (!p.email || !p.password) { warn(p.name + " has no email or password, so they cannot sign in."); return; }
+     const email = String(p.email).toLowerCase();
+     if (staffEmails[email]) warn("Two professors share the email " + p.email + ". Each needs their own.");
+@@ -3034,7 +3336,7 @@
+   app.appendChild(siteHeader(sections, page));
+   app.appendChild(accountBar());
+   app.appendChild(h("main", { id: "main", tabindex: "-1", class: "page" + (isPortal || isStaff || screen === "welcome" ? "" : " page-narrow") },
+-    hosted ? h("p", { class: "notice notice-warning", role: "status", id: "online-notice", hidden: !onlineNotice() }, onlineNotice() || "")
++    cloudMode ? h("p", { class: "notice notice-warning", role: "status", id: "online-notice", hidden: !onlineNotice() }, onlineNotice() || "")
+       : (storage.available ? null : h("p", { class: "notice notice-warning", role: "status" }, TEXT.storageWarning)),
+     ui.signInNotice ? h("p", { class: "notice notice-success", role: "status", id: "signin-notice" }, ui.signInNotice) : null,
+     isPortal || isStaff || editing ? null : stepIndicator(JOURNEY_STEP[screen]),
+@@ -3161,7 +3463,7 @@
+         h("button", { type: "button", class: "btn btn-quiet", onClick: openCookieSettings }, TEXT.cookieSettingsButton),
+         isStudent()
+           ? h("button", { type: "button", class: "btn btn-quiet", onClick: startAgain }, TEXT.startAgainButton)
+-          : (online.on ? null : h("button", { type: "button", class: "btn btn-quiet", onClick: resetDevice }, TEXT.resetDeviceButton)))
++          : (online.on || webMode ? null : h("button", { type: "button", class: "btn btn-quiet", onClick: resetDevice }, TEXT.resetDeviceButton)))
+     )
+   );
+ }
+@@ -3293,13 +3595,14 @@
+         h("p", { class: "account-who" },
+           badge(prof ? words.roleProfessor : words.roleStudent, "neutral"), " ",
+           h("strong", {}, fill(words.signedInAs, { name: name })),
+-          prof && hosted ? null : h("span", { class: "account-email" }, " " + session.email),
+-          hosted ? h("span", { id: "online-chip" }, onlineChip()) : null
++          prof && cloudMode ? null : h("span", { class: "account-email" }, " " + session.email),
++          cloudMode ? h("span", { id: "online-chip" }, onlineChip()) : null
+         ),
+         h("button", { type: "button", class: "btn btn-secondary btn-small", onClick: signOut }, words.signOutButton)
+       )
+     );
+   }
++  if (webMode) return webSignInBar();
+   if (hosted) return hostedSignInBar();
+   const role = ui.loginRole || "student";
+   function roleOption(value, label) {
+@@ -3424,6 +3727,7 @@
+ }
+ function handleSignIn(event) {
+   event.preventDefault();
++  if (webMode) { handleWebSignIn(); return; }
+   if (hosted) { handleHostedSignIn(); return; }
+   const words = TEXT.login;
+   const roleInput = document.querySelector('input[name="login-role"]:checked');
+@@ -3542,6 +3846,12 @@
+   render({ focusId: state.screen === "welcome" ? "welcome-start" : "screen-heading", scrollTop: true });
+ }
+ function signOut() {
++  if (webMode && online.client) {
++    // Website: sign out of Supabase, then start the page again, signed out.
++    const restart = function () { writeJson("sessionStorage", storageKey("online-session"), null); setHash(""); window.location.reload(); };
++    online.client.auth.signOut().then(restart, restart);
++    return;
++  }
+   if (online.on) writeJson("sessionStorage", storageKey("online-signed-out"), true);
+   session = null;
+   setHash("");
+@@ -3842,11 +4152,6 @@
+   return h("div", { class: "card" },
+     h("h1", { id: "screen-heading", tabindex: "-1" }, TERMS.title),
