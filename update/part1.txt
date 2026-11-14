@@ -1,0 +1,60 @@
+--- a/index.html
++++ b/index.html
+@@ -909,6 +909,27 @@
+ 
+ 
+ /* ---------------------------------------------------------------------
++   ONLINE_DATABASE: connects this website to your Supabase project, so
++   every student signs in and their progress is saved online.
++   Copy the two values from Supabase: Project Settings, then API (or
++   "Data API" / "API Keys").
++   url:        the Project URL, like "https://abcdefgh.supabase.co"
++   publicKey:  the "anon public" key (or the "publishable" key).
++               It is meant to be public. NEVER paste the
++               "service_role" or "secret" key here.
++   Leave both "" and the website cannot save online.
++   --------------------------------------------------------------------- */
++const ONLINE_DATABASE = {
++  // These two placeholders are swapped for the real values when GitHub
++  // publishes the site (from the repository's Actions secrets
++  // SUPABASE_URL and SUPABASE_ANON_KEY), so the values never sit in the
++  // code on GitHub. Do not type real values here.
++  url: "%%SUPABASE_URL%%",
++  publicKey: "%%SUPABASE_ANON_KEY%%",
++};
++
++
++/* ---------------------------------------------------------------------
+    SITE: general details shown in the top bar, footer and browser tab.
+    Change: edit the text inside the quotes.
+    --------------------------------------------------------------------- */
+@@ -1195,24 +1216,24 @@
+    Remove: delete the line (and any course that uses that id).
+    --------------------------------------------------------------------- */
+ const PROFESSORS = [
+-  { id: "prof-a", name: "Professor A", tbc: true, email: "professor.a@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-b", name: "Professor B", tbc: true, email: "professor.b@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-c", name: "Professor C", tbc: true, email: "professor.c@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-d", name: "Professor D", tbc: true, email: "professor.d@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-e", name: "Professor E", tbc: true, email: "professor.e@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-f", name: "Professor F", tbc: true, email: "professor.f@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-g", name: "Professor G", tbc: true, email: "professor.g@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-h", name: "Professor H", tbc: true, email: "professor.h@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-i", name: "Professor I", tbc: true, email: "professor.i@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-j", name: "Professor J", tbc: true, email: "professor.j@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-k", name: "Professor K", tbc: true, email: "professor.k@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-l", name: "Professor L", tbc: true, email: "professor.l@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-m", name: "Professor M", tbc: true, email: "professor.m@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-n", name: "Professor N", tbc: true, email: "professor.n@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-o", name: "Professor O", tbc: true, email: "professor.o@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-p", name: "Professor P", tbc: true, email: "professor.p@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-q", name: "Professor Q", tbc: true, email: "professor.q@hw.ac.uk", password: "Summer2026" },
+-  { id: "prof-r", name: "Professor R", tbc: true, email: "professor.r@hw.ac.uk", password: "Summer2026" },
++  { id: "prof-a", name: "Professor A", tbc: true, email: "", password: "" },
++  { id: "prof-b", name: "Professor B", tbc: true, email: "", password: "" },
++  { id: "prof-c", name: "Professor C", tbc: true, email: "", password: "" },
++  { id: "prof-d", name: "Professor D", tbc: true, email: "", password: "" },
++  { id: "prof-e", name: "Professor E", tbc: true, email: "", password: "" },
++  { id: "prof-f", name: "Professor F", tbc: true, email: "", password: "" },
++  { id: "prof-g", name: "Professor G", tbc: true, email: "", password: "" },
++  { id: "prof-h", name: "Professor H", tbc: true, email: "", password: "" },
