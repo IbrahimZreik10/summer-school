@@ -1,0 +1,82 @@
+--- a/index.html
++++ b/index.html
+@@ -2038,6 +2038,41 @@
+     welcomeBackNotice: "Welcome back, {name}.",
+   },
+ 
++  // Attendance: QR codes for professors, check-in messages for students (website version)
++  attendance: {
++    intro: "Start attendance for a class, then show the QR code on the screen. Students scan it with their phone camera and sign in with their university email. The code changes every {seconds} seconds, so a photo of it soon stops working.",
++    courseLine: "{level} group · {day}",
++    loading: "Loading attendance…",
++    noCourses: "You have no courses on the timetable yet.",
++    onlineOnly: "Attendance works on the online website, where students sign in with their university email.",
++    startButton: "Start attendance",
++    restartButton: "Start a new attendance",
++    endButton: "End attendance",
++    fullscreenButton: "Show full screen",
++    startedToast: "Attendance started for {course}. Show the QR code to your class.",
++    qrLabel: "Attendance QR code for {course}. It changes every few seconds.",
++    qrMissing: "The QR code could not be drawn. Check your internet connection and reload the page.",
++    changesIn: "New code in {seconds} s",
++    countLine: "{count} checked in",
++    endedNote: "attendance ended",
++    nobodyYet: "Nobody has checked in yet.",
++    errorSetup: "Attendance isn't set up in the database yet. The site owner needs to run supabase-setup.sql in Supabase (see SUPABASE-SETUP.md).",
++    errorStart: "Attendance couldn't start. Reload the page and try again.",
++    errorNetwork: "We couldn't reach the database. Check your internet connection and try again.",
++    student: {
++      signInFirst: "Sign in with your university email to finish checking in.",
++      checking: "Checking you in…",
++      done: "✓ Checked in: {course} with {professor} at {time}.",
++      already: "✓ You're already checked in: {course} with {professor} (since {time}).",
++      expired: "That QR code has already changed. Scan the code on the screen again.",
++      closed: "Attendance for this class has ended. Ask your professor.",
++      signin: "Sign in with your university email, then scan the code again.",
++      staff: "Professors don't need to check in.",
++      professor: "Professors don't need to check in.",
++      error: "We couldn't check you in. Scan the code on the screen again.",
++    },
++  },
++
+   // The professor's staff console
+   staff: {
+     kicker: "Staff console",
+@@ -2049,6 +2084,7 @@
+     sections: {
+       overview:    { menu: "Overview",        title: "Overview" },
+       results:     { menu: "Student results", title: "Student results" },
++      attendance:  { menu: "Attendance",      title: "Attendance" },
+       assignments: { menu: "Assignment board", title: "Assignment board" },
+       console:     { menu: "AI & Staff Console", title: "AI & Staff Console" },
+       assistant:   { menu: "My assistant",     title: "My assistant" },
+@@ -2150,6 +2186,7 @@
+         survey: "{user} finished the survey and joined the {detail} group",
+         timetable: "{user} confirmed their timetable",
+         assignment: "{user} listed “{detail}”",
++        checkin: "{user} checked in to {detail}",
+       },
+     },
+     console: {
+@@ -3051,6 +3088,250 @@
+ }
+ 
+ 
++/* ---------- 2d. Attendance with moving QR codes (website version) ----------
++   Each professor has an Attendance page with one QR code per course.
++   The code inside the QR changes every ATTENDANCE.codeSeconds seconds, so a
++   photo of it stops working almost straight away. Students scan it with
++   their phone camera, sign in with their university email, and the site
++   checks them in. The check happens in the database (check_in in
++   supabase-setup.sql), so nobody can mark themselves present without a
++   fresh code. Professors see who checked in, live. */
++const ATTENDANCE = {
++  codeSeconds: 20,      // how often the QR code changes
++  refreshSeconds: 4,    // how often the professor's list of students updates
++};
++const att = { loaded: false, loading: false, sessions: {}, ended: {}, lists: {}, timer: null, error: "", checking: false };
++const CHECKIN_KEY = "pending-checkin";
++
++function attendanceSupported() { return webMode && online.on && !!online.client; }
++function onAttendancePage() {
++  if (!isProfessor()) return false;
