@@ -909,6 +909,27 @@ html.lenis { scroll-behavior: auto !important; }
 
 
 /* ---------------------------------------------------------------------
+   ONLINE_DATABASE: connects this website to your Supabase project, so
+   every student signs in and their progress is saved online.
+   Copy the two values from Supabase: Project Settings, then API (or
+   "Data API" / "API Keys").
+   url:        the Project URL, like "https://abcdefgh.supabase.co"
+   publicKey:  the "anon public" key (or the "publishable" key).
+               It is meant to be public. NEVER paste the
+               "service_role" or "secret" key here.
+   Leave both "" and the website cannot save online.
+   --------------------------------------------------------------------- */
+const ONLINE_DATABASE = {
+  // These two placeholders are swapped for the real values when GitHub
+  // publishes the site (from the repository's Actions secrets
+  // SUPABASE_URL and SUPABASE_ANON_KEY), so the values never sit in the
+  // code on GitHub. Do not type real values here.
+  url: "%%SUPABASE_URL%%",
+  publicKey: "%%SUPABASE_ANON_KEY%%",
+};
+
+
+/* ---------------------------------------------------------------------
    SITE: general details shown in the top bar, footer and browser tab.
    Change: edit the text inside the quotes.
    --------------------------------------------------------------------- */
@@ -1195,24 +1216,24 @@ const TIMETABLE = {
    Remove: delete the line (and any course that uses that id).
    --------------------------------------------------------------------- */
 const PROFESSORS = [
-  { id: "prof-a", name: "Professor A", tbc: true, email: "professor.a@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-b", name: "Professor B", tbc: true, email: "professor.b@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-c", name: "Professor C", tbc: true, email: "professor.c@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-d", name: "Professor D", tbc: true, email: "professor.d@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-e", name: "Professor E", tbc: true, email: "professor.e@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-f", name: "Professor F", tbc: true, email: "professor.f@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-g", name: "Professor G", tbc: true, email: "professor.g@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-h", name: "Professor H", tbc: true, email: "professor.h@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-i", name: "Professor I", tbc: true, email: "professor.i@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-j", name: "Professor J", tbc: true, email: "professor.j@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-k", name: "Professor K", tbc: true, email: "professor.k@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-l", name: "Professor L", tbc: true, email: "professor.l@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-m", name: "Professor M", tbc: true, email: "professor.m@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-n", name: "Professor N", tbc: true, email: "professor.n@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-o", name: "Professor O", tbc: true, email: "professor.o@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-p", name: "Professor P", tbc: true, email: "professor.p@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-q", name: "Professor Q", tbc: true, email: "professor.q@hw.ac.uk", password: "Summer2026" },
-  { id: "prof-r", name: "Professor R", tbc: true, email: "professor.r@hw.ac.uk", password: "Summer2026" },
+  { id: "prof-a", name: "Professor A", tbc: true, email: "", password: "" },
+  { id: "prof-b", name: "Professor B", tbc: true, email: "", password: "" },
+  { id: "prof-c", name: "Professor C", tbc: true, email: "", password: "" },
+  { id: "prof-d", name: "Professor D", tbc: true, email: "", password: "" },
+  { id: "prof-e", name: "Professor E", tbc: true, email: "", password: "" },
+  { id: "prof-f", name: "Professor F", tbc: true, email: "", password: "" },
+  { id: "prof-g", name: "Professor G", tbc: true, email: "", password: "" },
+  { id: "prof-h", name: "Professor H", tbc: true, email: "", password: "" },
+  { id: "prof-i", name: "Professor I", tbc: true, email: "", password: "" },
+  { id: "prof-j", name: "Professor J", tbc: true, email: "", password: "" },
+  { id: "prof-k", name: "Professor K", tbc: true, email: "", password: "" },
+  { id: "prof-l", name: "Professor L", tbc: true, email: "", password: "" },
+  { id: "prof-m", name: "Professor M", tbc: true, email: "", password: "" },
+  { id: "prof-n", name: "Professor N", tbc: true, email: "", password: "" },
+  { id: "prof-o", name: "Professor O", tbc: true, email: "", password: "" },
+  { id: "prof-p", name: "Professor P", tbc: true, email: "", password: "" },
+  { id: "prof-q", name: "Professor Q", tbc: true, email: "", password: "" },
+  { id: "prof-r", name: "Professor R", tbc: true, email: "", password: "" },
 ];
 
 
@@ -1735,6 +1756,25 @@ const TEXT = {
     errorNotOwner: "Only the page owner can open the professor pages.",
     createdNotice: "Welcome, {name}. Your progress is saved online and opens on any device where you are signed in to Claude.",
     createdBrowserNotice: "Welcome, {name}. Your progress is saved in this browser.",
+  },
+  // Shown only on the website version (your own address, with Supabase).
+  web: {
+    emailLabel: "Email",
+    placeholderEmail: "Example: ibz4000@hw.ac.uk",
+    passwordLabel: "Password for this site",
+    signInButton: "Sign in",
+    busyButton: "Signing in…",
+    hint: "First time here? Type your email and choose a new password (at least {count} characters), and your account is created straight away. Please don't reuse your university password.",
+    errorEmail: "Type your full email address, like ibz4000@hw.ac.uk.",
+    errorPasswordShort: "Choose a password with at least {count} characters.",
+    errorWrongPassword: "That password doesn't match this email. Check it and try again.",
+    errorWeakPassword: "Choose a stronger password: at least {count} characters, with letters and numbers.",
+    errorConfirm: "Your account can't be used yet: the site owner needs to switch off “Confirm email” in Supabase (see SUPABASE-SETUP.md).",
+    errorSignupOff: "New accounts are switched off. Ask the site owner to allow new users in Supabase.",
+    errorNetwork: "We couldn't reach the sign-in service. Check your internet connection and try again.",
+    createdNotice: "Welcome, {name}. Your account is ready. Your progress saves online after every step, so you can carry on from any device.",
+    configNotice: "This website isn't connected to its database yet, so nobody can sign in. The site owner needs to add the Supabase address and public key (see SUPABASE-SETUP.md).",
+    setupNotice: "The online database isn't set up yet. The site owner needs to run supabase-setup.sql in Supabase (see SUPABASE-SETUP.md).",
   },
   confirmCancel: "Cancel",
   cookies: {
@@ -2368,7 +2408,7 @@ function loadSession() {
   const consent = loadConsent();
   if (!s && consent && consent.remember) s = readJson("localStorage", storageKey("remember"));
   if (!s || typeof s !== "object") return null;
-  if (s.role === "professor" && (hosted || !findById(PROFESSORS, s.professorId))) return null;
+  if (s.role === "professor" && (cloudMode || !findById(PROFESSORS, s.professorId))) return null;
   if (s.role === "student" && !db.logins[s.email]) return null;
   return s;
 }
@@ -2477,6 +2517,7 @@ const online = {
   greeted: false,     // the first answer from the database has arrived
 };
 function startOnline() {
+  if (webMode) { startWeb(); return; }
   if (!hosted) return;
   online.status = "connecting";
   Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (found) {
@@ -2591,12 +2632,18 @@ function applyStudentRecords(docs, metadata) {
   online.greeted = true;
 
   // Opening the page again (on any device) brings the student straight back to their progress.
-  if (!session && mine && !readJson("sessionStorage", storageKey("online-signed-out"))) {
-    online.username = mine.username;
-    session = { role: "student", email: online.keyByUid[online.uid] };
-    state = loadStudentState(mine.state);
+  // On the website, signing in does the same (and a first sign-in creates the record).
+  const signedOutHere = hosted && readJson("sessionStorage", storageKey("online-signed-out"));
+  const autoName = mine ? mine.username : (webMode ? online.email : "");
+  if (!session && autoName && !signedOutHere) {
+    online.username = autoName;
+    session = { role: "student", email: online.keyByUid[online.uid] || String(autoName).toLowerCase() };
+    state = loadStudentState(mine ? mine.state : null);
     ui = freshUi();
-    ui.signInNotice = fill(TEXT.login.welcomeBackNotice, { name: nameFromEmail(session.email) });
+    const event = online.pendingEvent;
+    online.pendingEvent = null;
+    ui.signInNotice = fill(event === "account" ? TEXT.web.createdNotice : TEXT.login.welcomeBackNotice, { name: nameFromEmail(session.email) });
+    if (event) { logActivity(event, session.email); save(); }   // the student just signed in: tell the professors
     render({ focusId: state.screen === "welcome" ? "welcome-start" : "screen-heading", scrollTop: true });
     return;
   }
@@ -2709,33 +2756,37 @@ function flushWrite(path) {
       return;
     }
     w.retried = false;
-    online.status = code === "invalid_argument" ? "readonly" : (code === "quota_exceeded" ? "full" : "problem");
+    online.status = code === "invalid_argument" ? "readonly" : (code === "quota_exceeded" ? "full" : (code === "setup" ? "setup" : "problem"));
     showOnlineStatus();
   });
 }
 function onlineFailed(error) {
   const code = error && error.code;
-  online.status = code === "revoked" ? "readonly" : "problem";
+  online.status = code === "revoked" ? "readonly" : (code === "setup" ? "setup" : "problem");
   showOnlineStatus();
 }
 // The small "Saved online" label and, when something is wrong, a notice.
 function onlineChip() {
   const words = TEXT.online;
-  if (!hosted) return null;
+  if (!cloudMode) return null;
+  if (webMode && !online.on) return null;
   if (!online.on) {
     return online.status === "connecting" ? badge(words.chipConnecting, "neutral") : badge(words.chipBrowser, "tbc");
   }
   const kinds = { live: ["chipLive", "success"], connecting: ["chipConnecting", "neutral"], slow: ["chipProblem", "danger"],
-    problem: ["chipProblem", "danger"], readonly: ["chipReadOnly", "tbc"], full: ["chipProblem", "danger"] };
+    problem: ["chipProblem", "danger"], readonly: ["chipReadOnly", "tbc"], full: ["chipProblem", "danger"], setup: ["chipProblem", "danger"] };
   const k = kinds[online.status] || kinds.connecting;
   return badge(words[k[0]], k[1]);
 }
 function onlineNotice() {
   const words = TEXT.online;
-  if (!hosted) return null;
+  if (!cloudMode) return null;
+  if (webMode && !online.on) {
+    return { config: TEXT.web.configNotice, setup: TEXT.web.setupNotice, problem: TEXT.web.errorNetwork }[online.status] || null;
+  }
   if (!online.on && online.status === "off") return words.browserOnlyNotice;
   if (!online.on) return null;
-  return { slow: words.slowNotice, problem: words.problemNotice, readonly: words.readOnlyNotice, full: words.fullNotice }[online.status] || null;
+  return { slow: words.slowNotice, problem: words.problemNotice, readonly: words.readOnlyNotice, full: words.fullNotice, setup: TEXT.web.setupNotice }[online.status] || null;
 }
 function showOnlineStatus() {
   const chip = document.getElementById("online-chip");
@@ -2746,6 +2797,257 @@ function showOnlineStatus() {
     box.textContent = text || "";
     box.hidden = !text;
   }
+}
+
+
+/* ---------- 2c. Saving online on your own website (Supabase) ----------
+   Used only in the website version, when ONLINE_DATABASE (top of PART 1)
+   holds your Supabase address and public key. Students sign in with an
+   email and a password made just for this site; Supabase keeps the
+   passwords safely (the site never sees or stores them). This part gives
+   the online saving code above the same kind of database it uses inside
+   claude.ai, so both behave the same way.
+   Tables (made by supabase-setup.sql):
+     students     one row per student: username, progress, recent events
+     site         assignments and console settings (professors write)
+     staff        the professors' emails (who may open the professor pages)
+     staff_chats  each professor's assistant conversation */
+let webMode = false;     // true in the website version with ONLINE_DATABASE filled in
+let cloudMode = hosted;  // true when saving online (claude.ai or the website)
+function supabaseBase(client) {
+  const TABLES = {
+    students: { table: "students", key: "user_id" },
+    site: { table: "site", key: "id" },
+    chats: { table: "staff_chats", key: "user_id" },
+  };
+  function where(path) {
+    const s = path.split("/");
+    if (s[0] === "students") return { t: TABLES.students, id: s[1] };
+    if (s[0] === "shared") return { t: TABLES.site, id: s[1] };
+    if (s[0] === "data" && s[3] === "chats") return { t: TABLES.chats, id: s[2] };
+    throw new TypeError("No table for " + path);
+  }
+  function iso(value) { const d = new Date(value); return isNaN(d.getTime()) ? "" : d.toISOString(); }
+  function toRow(w, body) {
+    if (w.t === TABLES.students) {
+      return { user_id: w.id, username: body.username, created_at: body.createdAt || new Date().toISOString(),
+        updated_at: body.updatedAt, state: body.state || {}, events: body.events || [] };
+    }
+    if (w.t === TABLES.site) return { id: w.id, data: body, updated_at: body.updatedAt };
+    return { user_id: w.id, chats: body.chats || {} };
+  }
+  function fromRow(w, row) {
+    if (w.t === TABLES.students) {
+      return { username: row.username, createdAt: iso(row.created_at), updatedAt: iso(row.updated_at), state: row.state || {}, events: row.events || [] };
+    }
+    if (w.t === TABLES.site) return row.data || {};
+    return { chats: row.chats || {} };
+  }
+  // Turns a Supabase error into one of the codes the saving code understands.
+  function failure(error) {
+    const code = String((error && error.code) || "");
+    const status = error && error.status;
+    const message = (error && error.message) || "";
+    if (code === "42501" || status === 401 || status === 403) return { code: "invalid_argument", message: message };
+    if (code === "42P01" || /^PGRST20[2-5]$/.test(code)) return { code: "setup", message: message };
+    return { code: "unavailable", message: message };
+  }
+  function snapshot(id, body) {
+    return { id: id, exists: !!body, data: function () { return body ? JSON.parse(JSON.stringify(body)) : undefined; },
+      metadata: { fromCache: false, hasPendingWrites: false } };
+  }
+  // Reads again whenever the table changes (live updates), and every 30 seconds
+  // as a back-up in case live updates are switched off in Supabase.
+  function watch(table, filter, read) {
+    let timer = null;
+    const soon = function () { window.clearTimeout(timer); timer = window.setTimeout(read, 250); };
+    const options = { event: "*", schema: "public", table: table };
+    if (filter) options.filter = filter;
+    let channel = null;
+    try {
+      channel = client.channel("ssic-" + table + "-" + Math.random().toString(36).slice(2)).on("postgres_changes", options, soon).subscribe();
+    } catch (error) { channel = null; }
+    const poll = window.setInterval(function () { if (!document.hidden) read(); }, 30000);
+    read();
+    return function () {
+      window.clearInterval(poll);
+      window.clearTimeout(timer);
+      if (channel) { try { client.removeChannel(channel); } catch (error) { /* already closed */ } }
+    };
+  }
+  function listen(table, filter, query, deliver, fail) {
+    let stopped = false;
+    let stop = function () {};
+    stop = watch(table, filter, function () {
+      query().then(function (result) {
+        if (stopped) return;
+        if (result.error) {
+          const f = failure(result.error);
+          if (f.code === "unavailable") return;   // a hiccup: the next read tries again
+          stopped = true;
+          stop();
+          if (fail) fail(f);
+          return;
+        }
+        deliver(result.data);
+      }, function () { /* offline: the next read tries again */ });
+    });
+    return function () { stopped = true; stop(); };
+  }
+  function doc(path) {
+    const w = where(path);
+    return {
+      path: path,
+      set: function (body) {
+        return client.from(w.t.table).upsert(toRow(w, body)).then(function (result) {
+          if (result.error) throw failure(result.error);
+        }, function (error) { throw { code: "unavailable", message: String(error && error.message || error) }; });
+      },
+      onSnapshot: function (next, fail) {
+        return listen(w.t.table, w.t.key + "=eq." + w.id,
+          function () { return client.from(w.t.table).select("*").eq(w.t.key, w.id).maybeSingle(); },
+          function (row) { next(snapshot(w.id, row ? fromRow(w, row) : null)); }, fail);
+      },
+    };
+  }
+  function collection(path) {
+    const w = where(path + "/all");
+    return {
+      path: path,
+      onSnapshot: function (next, fail) {
+        return listen(w.t.table, null,
+          function () { return client.from(w.t.table).select("*"); },
+          function (rows) {
+            const docs = (rows || []).map(function (row) { return snapshot(row[w.t.key], fromRow(w, row)); });
+            next({ docs: docs, size: docs.length, empty: !docs.length, metadata: { fromCache: false, hasPendingWrites: false } });
+          }, fail);
+      },
+    };
+  }
+  return { doc: doc, collection: collection };
+}
+// Website version: connect to Supabase and, if this browser is already signed in, carry on.
+function startWeb() {
+  if (!ONLINE_DATABASE || !ONLINE_DATABASE.url || !ONLINE_DATABASE.publicKey ||
+      String(ONLINE_DATABASE.url).indexOf("%%") !== -1 || String(ONLINE_DATABASE.publicKey).indexOf("%%") !== -1 ||
+      !(window.supabase && typeof window.supabase.createClient === "function")) { online.status = "config"; return; }
+  const consent = loadConsent();
+  let area;
+  try { area = consent && consent.remember ? window.localStorage : window.sessionStorage; area.getItem("ssic"); } catch (error) { area = undefined; }
+  try {
+    online.client = window.supabase.createClient(ONLINE_DATABASE.url, ONLINE_DATABASE.publicKey,
+      { auth: { persistSession: true, autoRefreshToken: true, storage: area } });
+  } catch (error) { online.status = "config"; return; }
+  online.status = "connecting";
+  online.client.auth.getSession().then(function (result) {
+    const s = result && result.data && result.data.session;
+    if (s && s.user) return enterWeb(s.user, null);
+    online.status = "off";
+    render({ keepFocusScroll: true });
+  }).catch(function () { online.status = "off"; render({ keepFocusScroll: true }); });
+}
+// After signing in: professors (listed in the staff table) get the professor pages,
+// everyone else is a student and gets their saved progress back.
+function enterWeb(user, event) {
+  online.email = String(user.email || "").toLowerCase();
+  online.pendingEvent = event || null;
+  return online.client.from("staff").select("professor_id").maybeSingle().then(function (result) {
+    if (result.error && /^(42P01|PGRST20[2-5])$/.test(String(result.error.code || ""))) {
+      online.status = "setup";
+      render({ keepFocusScroll: true });
+      return;
+    }
+    const row = result.error ? null : result.data;
+    goOnline(supabaseBase(online.client), user.id, !!row);
+    if (row) {
+      const prof = findById(PROFESSORS, row.professor_id) || PROFESSORS[0];
+      session = { role: "professor", email: prof.name, professorId: prof.id };
+      state = freshState();
+      ui = freshUi();
+      online.pendingEvent = null;
+      ui.signInNotice = fill(TEXT.login.welcomeBackNotice, { name: prof.name });
+      saveSession();
+      render({ focusId: "screen-heading", scrollTop: true });
+    }
+  }, function () { online.status = "problem"; render({ keepFocusScroll: true }); });
+}
+function webSignInBar() {
+  const words = TEXT.login;
+  const ww = TEXT.web;
+  const waiting = online.on ? !online.greeted : online.status === "connecting";
+  const min = Number(LOGIN.minimumPasswordLength) || 8;
+  return h("section", { class: "account-bar" + (ui.loginOpen ? " is-open" : ""), id: "account-bar", "aria-label": words.regionLabel },
+    h("div", { class: "account-inner" },
+      h("div", { class: "login-summary" },
+        h("p", { class: "login-title" }, h("span", { class: "login-title-wide" }, words.title), h("span", { class: "login-title-narrow" }, words.collapsedText)),
+        waiting ? null : h("button", { type: "button", class: "btn btn-primary btn-small login-toggle", id: "login-toggle", "aria-expanded": ui.loginOpen ? "true" : "false", "aria-controls": "login-body", onClick: toggleLogin },
+          ui.loginOpen ? words.closeButton : words.openButton)
+      ),
+      waiting
+        ? h("p", { class: "login-hint", role: "status" }, TEXT.online.connecting)
+        : h("div", { class: "login-body", id: "login-body" },
+            h("form", { class: "login-form", novalidate: true, onSubmit: handleSignIn },
+              h("div", { class: "login-field" },
+                h("label", { for: "login-email", id: "login-email-label" }, ww.emailLabel),
+                h("input", { type: "email", id: "login-email", autocomplete: "email", autocapitalize: "none", spellcheck: "false",
+                  placeholder: ww.placeholderEmail, "aria-describedby": "login-hint login-error" })),
+              h("div", { class: "login-field" },
+                h("label", { for: "login-password" }, ww.passwordLabel),
+                h("input", { type: "password", id: "login-password", autocomplete: "current-password", "aria-describedby": "login-hint login-error" })),
+              h("button", { type: "submit", class: "btn btn-primary login-submit", id: "login-submit" }, ww.signInButton)
+            ),
+            h("p", { class: "form-error", id: "login-error", role: "alert" }),
+            h("p", { class: "login-hint", id: "login-hint" }, fill(ww.hint, { count: min }))
+          )
+    )
+  );
+}
+// Sign in, or create the account the first time (like the downloaded version).
+function handleWebSignIn() {
+  const ww = TEXT.web;
+  const emailBox = document.getElementById("login-email");
+  const passwordBox = document.getElementById("login-password");
+  const errorBox = document.getElementById("login-error");
+  const button = document.getElementById("login-submit");
+  const email = emailBox.value.trim().toLowerCase();
+  const password = passwordBox.value;
+  const min = Number(LOGIN.minimumPasswordLength) || 8;
+  emailBox.removeAttribute("aria-invalid");
+  passwordBox.removeAttribute("aria-invalid");
+  errorBox.textContent = "";
+  function busy(on) { button.disabled = on; button.textContent = on ? ww.busyButton : ww.signInButton; }
+  function fail(message, box) {
+    busy(false);
+    errorBox.textContent = message;
+    if (box) { box.setAttribute("aria-invalid", "true"); box.focus(); }
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { fail(ww.errorEmail, emailBox); return; }
+  if (password.length < min) { fail(fill(ww.errorPasswordShort, { count: min }), passwordBox); return; }
+  if (!online.client) { fail(ww.configNotice); return; }
+  busy(true);
+  const auth = online.client.auth;
+  auth.signInWithPassword({ email: email, password: password }).then(function (result) {
+    if (!result.error && result.data && result.data.session) return enterWeb(result.data.session.user, "signin");
+    const error = result.error || {};
+    const code = String(error.code || "");
+    const message = String(error.message || "").toLowerCase();
+    if (code === "email_not_confirmed" || message.indexOf("not confirmed") !== -1) { fail(ww.errorConfirm); return; }
+    if (code !== "invalid_credentials" && message.indexOf("invalid login") === -1) { fail(ww.errorNetwork); return; }
+    // No account with this email and password yet: create one.
+    return auth.signUp({ email: email, password: password }).then(function (made) {
+      if (made.error) {
+        const c = String(made.error.code || "");
+        const m = String(made.error.message || "").toLowerCase();
+        if (c === "user_already_exists" || m.indexOf("already registered") !== -1) { fail(ww.errorWrongPassword, passwordBox); return; }
+        if (c === "weak_password" || m.indexOf("password") !== -1) { fail(fill(ww.errorWeakPassword, { count: min }), passwordBox); return; }
+        if (c === "signup_disabled") { fail(ww.errorSignupOff); return; }
+        fail(ww.errorNetwork);
+        return;
+      }
+      if (!made.data || !made.data.session) { fail(ww.errorConfirm); return; }
+      return enterWeb(made.data.session.user, "account");
+    });
+  }).catch(function () { fail(ww.errorNetwork); });
 }
 
 
@@ -2841,7 +3143,7 @@ function checkConfig() {
 
   // Logins (inside claude.ai professors need no email or password: the page owner opens the staff pages)
   const staffEmails = {};
-  if (!hosted) PROFESSORS.forEach(function (p) {
+  if (!cloudMode) PROFESSORS.forEach(function (p) {
     if (!p.email || !p.password) { warn(p.name + " has no email or password, so they cannot sign in."); return; }
     const email = String(p.email).toLowerCase();
     if (staffEmails[email]) warn("Two professors share the email " + p.email + ". Each needs their own.");
@@ -3034,7 +3336,7 @@ function render(options) {
   app.appendChild(siteHeader(sections, page));
   app.appendChild(accountBar());
   app.appendChild(h("main", { id: "main", tabindex: "-1", class: "page" + (isPortal || isStaff || screen === "welcome" ? "" : " page-narrow") },
-    hosted ? h("p", { class: "notice notice-warning", role: "status", id: "online-notice", hidden: !onlineNotice() }, onlineNotice() || "")
+    cloudMode ? h("p", { class: "notice notice-warning", role: "status", id: "online-notice", hidden: !onlineNotice() }, onlineNotice() || "")
       : (storage.available ? null : h("p", { class: "notice notice-warning", role: "status" }, TEXT.storageWarning)),
     ui.signInNotice ? h("p", { class: "notice notice-success", role: "status", id: "signin-notice" }, ui.signInNotice) : null,
     isPortal || isStaff || editing ? null : stepIndicator(JOURNEY_STEP[screen]),
@@ -3161,7 +3463,7 @@ function siteFooter() {
         h("button", { type: "button", class: "btn btn-quiet", onClick: openCookieSettings }, TEXT.cookieSettingsButton),
         isStudent()
           ? h("button", { type: "button", class: "btn btn-quiet", onClick: startAgain }, TEXT.startAgainButton)
-          : (online.on ? null : h("button", { type: "button", class: "btn btn-quiet", onClick: resetDevice }, TEXT.resetDeviceButton)))
+          : (online.on || webMode ? null : h("button", { type: "button", class: "btn btn-quiet", onClick: resetDevice }, TEXT.resetDeviceButton)))
     )
   );
 }
@@ -3293,13 +3595,14 @@ function accountBar() {
         h("p", { class: "account-who" },
           badge(prof ? words.roleProfessor : words.roleStudent, "neutral"), " ",
           h("strong", {}, fill(words.signedInAs, { name: name })),
-          prof && hosted ? null : h("span", { class: "account-email" }, " " + session.email),
-          hosted ? h("span", { id: "online-chip" }, onlineChip()) : null
+          prof && cloudMode ? null : h("span", { class: "account-email" }, " " + session.email),
+          cloudMode ? h("span", { id: "online-chip" }, onlineChip()) : null
         ),
         h("button", { type: "button", class: "btn btn-secondary btn-small", onClick: signOut }, words.signOutButton)
       )
     );
   }
+  if (webMode) return webSignInBar();
   if (hosted) return hostedSignInBar();
   const role = ui.loginRole || "student";
   function roleOption(value, label) {
@@ -3424,6 +3727,7 @@ function openSignIn() {
 }
 function handleSignIn(event) {
   event.preventDefault();
+  if (webMode) { handleWebSignIn(); return; }
   if (hosted) { handleHostedSignIn(); return; }
   const words = TEXT.login;
   const roleInput = document.querySelector('input[name="login-role"]:checked');
@@ -3542,6 +3846,12 @@ function handleHostedSignIn() {
   render({ focusId: state.screen === "welcome" ? "welcome-start" : "screen-heading", scrollTop: true });
 }
 function signOut() {
+  if (webMode && online.client) {
+    // Website: sign out of Supabase, then start the page again, signed out.
+    const restart = function () { writeJson("sessionStorage", storageKey("online-session"), null); setHash(""); window.location.reload(); };
+    online.client.auth.signOut().then(restart, restart);
+    return;
+  }
   if (online.on) writeJson("sessionStorage", storageKey("online-signed-out"), true);
   session = null;
   setHash("");
@@ -3842,11 +4152,6 @@ function screenTerms() {
   return h("div", { class: "card" },
     h("h1", { id: "screen-heading", tabindex: "-1" }, TERMS.title),
     TERMS.paragraphs.map(function (p) { return h("p", {}, p); }),
-    h("h2", {}, TERMS.codeOfConductTitle),
-    h("p", {}, TERMS.codeOfConductIntro),
-    h("ul", { class: "conduct-list" }, CODE_OF_CONDUCT.map(function (item) {
-      return h("li", { class: "conduct-item" }, h("strong", {}, item.title), h("p", {}, item.text));
-    })),
     h("h2", {}, TERMS.assignmentRuleTitle),
     h("div", { class: "rule" }, h("p", {}, TERMS.assignmentRule)),
     checkRow,
@@ -5514,6 +5819,9 @@ function countUp() {
 
 /* ---------- 10. Start-up ---------- */
 function start() {
+  // The website version has ONLINE_DATABASE at the top of PART 1; the downloaded file does not.
+  webMode = !hosted && typeof ONLINE_DATABASE !== "undefined";
+  cloudMode = hosted || webMode;
   db = loadDb();
   session = loadSession();
   state = isStudent() ? loadStudentState(db.students[session.email]) : freshState();
@@ -5533,6 +5841,8 @@ if (document.readyState === "loading") document.addEventListener("DOMContentLoad
 else start();
 </script>
 
+<!-- Supabase JS (MIT License): signs students in and saves their progress. https://github.com/supabase/supabase-js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* =====================================================================
    LIBRARIES (no need to edit)
