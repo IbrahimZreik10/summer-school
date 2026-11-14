@@ -2483,7 +2483,7 @@ function loadStudentState(saved) {
 function save() {
   if (isStudent()) db.students[session.email] = state;
   if (online.on) saveOnline();     // published on claude.ai: save to the shared database
-  else storage.save(db);           // otherwise: save in this browser
+  else if (!webMode) storage.save(db);           // otherwise: save in this browser
   saveSession();
 }
 
@@ -3507,7 +3507,7 @@ function openCookieSettings() {
    finishes the survey or confirms a timetable; a professor lists an
    assignment), this tab updates by itself. */
 function onSharedChange(event) {
-  if (online.on || event.key !== SITE.storageName) return;
+  if (online.on || webMode || event.key !== SITE.storageName) return;
   db = loadDb();
   if (isStudent() && !db.logins[session.email]) session = null;
   if (isStudent()) state = loadStudentState(db.students[session.email]);
@@ -5822,8 +5822,8 @@ function start() {
   // The website version has ONLINE_DATABASE at the top of PART 1; the downloaded file does not.
   webMode = !hosted && typeof ONLINE_DATABASE !== "undefined";
   cloudMode = hosted || webMode;
-  db = loadDb();
-  session = loadSession();
+  db = webMode ? freshDb() : loadDb();
+  session = webMode ? null : loadSession();
   state = isStudent() ? loadStudentState(db.students[session.email]) : freshState();
   ui = freshUi();
   checkConfig();
