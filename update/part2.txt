@@ -1,0 +1,91 @@
++  let id = "";
++  try { id = decodeURIComponent((window.location.hash || "").slice(1)); } catch (error) { id = ""; }
++  return id === "staff-attendance";
++}
++function attWindow() { return Math.floor(Date.now() / 1000 / ATTENDANCE.codeSeconds); }
++// The code for one time window: the first 12 characters of HMAC-SHA256(secret, window).
++function attCode(secret, windowNo) {
++  const enc = new TextEncoder();
++  return window.crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
++    .then(function (key) { return window.crypto.subtle.sign("HMAC", key, enc.encode(String(windowNo))); })
++    .then(function (sig) {
++      return Array.prototype.map.call(new Uint8Array(sig), function (b) { return b.toString(16).padStart(2, "0"); }).join("").slice(0, 12);
++    });
++}
++function attLink(sessionId, code) {
++  return window.location.origin + window.location.pathname + "#checkin=" + sessionId + "." + code;
++}
++function attQrSvg(text) {
++  if (typeof window.qrcode !== "function") return null;
++  const qr = window.qrcode(0, "M");
++  qr.addData(text);
++  qr.make();
++  return qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
++}
++function attClock(iso) {
++  const d = new Date(iso);
++  return isNaN(d.getTime()) ? "" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
++}
++function attSessionIds() {
++  return Object.keys(att.sessions).map(function (k) { return att.sessions[k].id; })
++    .concat(Object.keys(att.ended).map(function (k) { return att.ended[k].id; }));
++}
++
++// Professor: load this professor's open attendance sessions.
++function attLoad() {
++  if (!attendanceSupported() || att.loading) return;
++  att.loading = true;
++  online.client.from("attendance_sessions").select("id, course_id, course_name, secret, started_at")
++    .eq("professor_user", online.uid).is("ended_at", null).order("started_at", { ascending: false })
++    .then(function (res) {
++      att.loading = false;
++      att.loaded = true;
++      if (res.error) {
++        att.error = TEXT.attendance.errorSetup;
++      } else {
++        att.error = "";
++        att.sessions = {};
++        (res.data || []).forEach(function (row) { if (!att.sessions[row.course_id]) att.sessions[row.course_id] = row; });
++      }
++      if (onAttendancePage()) render({ keepFocusScroll: true });
++      attPoll();
++    }, function () { att.loading = false; att.loaded = true; att.error = TEXT.attendance.errorNetwork; if (onAttendancePage()) render({ keepFocusScroll: true }); });
++}
++function attStart(course) {
++  const words = TEXT.attendance;
++  const prev = att.sessions[course.id];
++  const closing = prev
++    ? online.client.from("attendance_sessions").update({ ended_at: new Date().toISOString() }).eq("id", prev.id)
++    : Promise.resolve({});
++  Promise.resolve(closing).then(function () {
++    return online.client.from("attendance_sessions")
++      .insert({ professor_user: online.uid, professor_id: session.professorId, course_id: course.id, course_name: course.name })
++      .select("id, course_id, course_name, secret, started_at").single();
++  }).then(function (res) {
++    if (res.error) {
++      att.error = words.errorStart;
++    } else {
++      att.error = "";
++      att.sessions[course.id] = res.data;
++      delete att.ended[course.id];
++      att.lists[res.data.id] = [];
++      showToast(fill(words.startedToast, { course: course.name }));
++    }
++    render({ keepFocusScroll: true });
++  }, function () { att.error = words.errorNetwork; render({ keepFocusScroll: true }); });
++}
++function attEnd(course) {
++  const s = att.sessions[course.id];
++  if (!s) return;
++  online.client.from("attendance_sessions").update({ ended_at: new Date().toISOString() }).eq("id", s.id).then(function (res) {
++    if (res.error) { att.error = TEXT.attendance.errorNetwork; } else { att.ended[course.id] = s; delete att.sessions[course.id]; }
++    render({ keepFocusScroll: true });
++  });
++}
++// Professor: fetch who has checked in to the sessions on screen.
++function attPoll() {
++  if (!attendanceSupported() || !isProfessor()) return;
++  const ids = attSessionIds();
++  if (!ids.length) return;
++  online.client.from("attendance").select("session_id, email, checked_at").in("session_id", ids).order("checked_at", { ascending: true })
++    .then(function (res) {
