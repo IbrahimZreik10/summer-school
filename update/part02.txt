@@ -1,0 +1,72 @@
++      "Estimate 19 × 21 in your head, then work it out exactly.",
++    ],
++    programming: [
++      "What does this print: for i in range(3): print(i * 2)",
++      "Name one way to find a bug without running the program.",
++      "Write the steps for making tea as a program with one loop and one condition.",
++    ],
++    critical: [
++      "A website says a study proves something. What three questions do you ask first?",
++      "What makes a source reliable enough for a university assignment?",
++      "Ice-cream sales and sunburn both rise in summer. Does one cause the other?",
++    ],
++    teamwork: [
++      "What is one thing that makes group work go badly, and how would you prevent it?",
++      "Which team role suits you best, and why?",
++      "A teammate missed a deadline. What do you say to them?",
++    ],
++    time: [
++      "List three tasks for this week and put them in order of urgency.",
++      "How long does a 500-word report take? Plan it in steps.",
++      "What is one distraction you will remove while studying this week?",
++    ],
++  },
++  aiPolicy: "Students may use AI tools when the assignment instructions allow it. They must check facts against reliable sources, do their own thinking, and say clearly how they used AI (for example, one sentence at the end of their work). Copying AI text and presenting it as their own work is not allowed.",
++};
++
++
++/* ---------------------------------------------------------------------
+    TEXT: buttons, headings, labels and messages on every screen.
+    Organised by screen. Change the words between the quotes.
+    Keep any {words in curly brackets}: the site fills them in.
+@@ -2223,17 +2311,19 @@
+       updated: "Snapshot updated at {time}.",
+     },
+     assistant: {
+-      intro: "Your assistant drafts emails and assignment briefs, finds students who need support and summarises your week. Drafts are never sent.",
++      intro: "Ask your assistant about your students, their results, attendance, your timetable, assignments or teaching ideas. It answers from the summer school's own data. Drafts are never sent.",
+       assistantName: "{name}'s assistant",
+-      online: "Online · simulated, works from the data on this device",
++      online: "Simulated assistant · answers from the summer school's data",
+       clearButton: "Clear conversation",
+       logLabel: "Conversation with your assistant",
+       promptsLabel: "Suggested questions",
+       prompts: [
+-        "Draft a reminder email for my group",
+-        "Which students need support this week?",
+-        "Draft next week's assignment brief",
+-        "Summarise today's live session",
++        "How is my group doing?",
++        "Who attended my last class?",
++        "Which students need support?",
++        "When is my next class?",
++        "Give me a warm-up for my class",
++        "What can you do?",
+       ],
+       inputLabel: "Message your assistant",
+       placeholder: "Message {name}'s assistant…",
+@@ -2248,12 +2338,12 @@
+       addToBoardButton: "Add to my assignment board as a draft",
+       openBoardButton: "Open the assignment board",
+       addedReply: "Done. “{title}” is on your assignment board as a draft. Students cannot see it until you approve and list it.",
+-      greeting: "Hello, {name}. I'm your assistant. Ask me about your group, your students or your week. Try one of the suggestions below.",
++      greeting: "Hello, {name}. I'm your assistant. Ask me about your students, their results, attendance, your timetable, assignments or teaching ideas. Type “help” to see everything I can answer.",
+       emailDraft: "Draft email (not sent)\n\nSubject: This week in {course} ({level} group)\n\nDear students,\n\nA quick reminder for this week:\n{lines}\n\nYour class is on {day}, at the time you chose in your timetable. If you have any questions, reply to this email or visit the summer school office.\n\nBest wishes,\n{name}",
+       emailAssignmentLine: "• Assignment due: {title}, {due}",
+       emailExamLine: "• {title}: {when}",
+       emailNothingDue: "• Nothing is due this week. Use the time to review your notes.",
+-      noStudents: "No students in your groups have finished the survey on this device yet. Results appear here as soon as they do.",
++      noStudents: "No students in your group have finished the survey yet. Results appear here as soon as they do.",
+       supportReply: "Students in the {level} group who may need support this week (lowest average scores first):\n\n{lines}\n\nThis is a suggestion to help you decide. You make the final call.",
+       supportLine: "{n}. {name}: average {score} / {max}. Skills to grow: {skills}. {suggestion}",
+       supportWorkshop: "Suggest the extra class “{workshop}” ({when}).",
