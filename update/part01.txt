@@ -1,0 +1,75 @@
+--- a/index.html
++++ b/index.html
+@@ -1553,7 +1553,7 @@
+   { question: "What happens if I miss a class?", answer: "Attendance is recorded every class day. Tell the summer school office, then catch up using your group's materials." },
+   { question: "Am I allowed to use AI tools?", answer: "Yes, when your assignment instructions allow it. Check the facts, do your own thinking and say clearly how you used AI." },
+   { question: "Are extra classes and multisport compulsory?", answer: "No. They are optional, but they are a great way to build confidence and meet people." },
+-  { question: "Who can see my survey answers?", answer: "In this version of the site, your answers are saved only in this browser on this device." },
++  { question: "Who can see my survey answers?", answer: "Your answers are saved securely online with your account. Only you and the summer school professors can see them." },
+ ];
+ 
+ 
+@@ -1699,6 +1699,94 @@
+ 
+ 
+ /* ---------------------------------------------------------------------
++   ASSISTANT_KNOWLEDGE: what the professors' assistant knows on top of the
++   site's own data (students, results, attendance, timetable, assignments).
++   tips:     teaching ideas for each skill (skill ids from SURVEY_SKILLS).
++   warmups:  short starter questions for each skill.
++   aiPolicy: how the assistant explains the rules on using AI.
++   Add a tip or question: add a line in quotes (with a comma).
++   Remove one: delete the line.
++   --------------------------------------------------------------------- */
++const ASSISTANT_KNOWLEDGE = {
++  tips: {
++    ai: [
++      "Give pairs an AI answer that contains one mistake and ask them to find and fix it using the course notes.",
++      "Ask students to keep a short prompt log and add one line saying how they used AI in each task.",
++      "Compare an AI explanation with the textbook: what did the AI miss, simplify or get wrong?",
++    ],
++    writing: [
++      "Model a paragraph live (point, evidence, explanation, link), then let students write one in pairs.",
++      "Run a 10-minute referencing drill: three sources, format them in the course style, swap and check.",
++      "Paraphrasing practice: hide the original text, ask students to rewrite it from memory, then compare.",
++    ],
++    maths: [
++      "Show two worked examples, then a third with the last steps missing for students to finish.",
++      "Use mini whiteboards: everyone shows an answer at once, so you see straight away who needs help.",
++      "Ask students to explain each step in words; mistakes usually appear where the words stop.",
++    ],
++    programming: [
++      "Live-code with deliberate bugs and let the class find them before you run the program.",
++      "Pair programming: one types, one explains, and they swap every 10 minutes.",
++      "Give a working program and ask students to predict what one small change will do before running it.",
++    ],
++    critical: [
++      "Give three sources on one claim and ask which is most reliable, and why.",
++      "Use claim, evidence, doubt: students state a claim, the evidence for it and one reason to doubt it.",
++      "Show a misleading graph or headline and ask what is missing.",
++    ],
++    teamwork: [
++      "Give every team member a role (lead, timekeeper, checker, presenter) and rotate the roles each task.",
++      "End group work with a two-minute reflection: what went well, and what would you change?",
++      "Set a shared goal with individual parts, so every student has something they must deliver.",
++    ],
++    time: [
++      "Break the next assignment into three dated checkpoints and check them in class.",
++      "Ask students to plan their week in five minutes at the start of the first class of the week.",
++      "Show how long tasks really take: students estimate first, then time it and compare.",
++    ],
++  },
++  warmups: {
++    ai: [
++      "An AI tool gives you a formula with no source. What are two ways to check it?",
++      "When would using AI in an assignment count as cheating?",
++      "Write one prompt that asks AI to quiz you instead of giving you the answer.",
++    ],
++    writing: [
++      "What is the difference between quoting and paraphrasing?",
++      "Fix this reference: smith, j 2020 climate change (oxford).",
++      "Write one sentence that states the main point of the last class.",
++    ],
++    maths: [
++      "Solve 3x + 5 = 20 and explain each step in words.",
++      "A graph goes up and then flattens. Describe what is happening in one sentence.",
