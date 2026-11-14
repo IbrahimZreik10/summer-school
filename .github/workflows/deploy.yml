@@ -1,0 +1,55 @@
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add the Supabase settings from the repository secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Add the SUPABASE_URL and SUPABASE_ANON_KEY secrets (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          mkdir -p _site
+          python3 - <<'PY'
+          import os
+          page = open("index.html", encoding="utf-8").read()
+          for name in ("SUPABASE_URL", "SUPABASE_ANON_KEY"):
+              marker = "%%" + name + "%%"
+              if page.count(marker) != 1:
+                  raise SystemExit("index.html should contain " + marker + " exactly once")
+              page = page.replace(marker, os.environ[name].strip())
+          open("_site/index.html", "w", encoding="utf-8").write(page)
+          PY
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
