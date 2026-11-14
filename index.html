@@ -6107,6 +6107,7 @@ function start() {
   cloudMode = hosted || webMode;
   db = webMode ? freshDb() : loadDb();
   session = webMode ? null : loadSession();
+  if (webMode) { try { window.localStorage.removeItem(SITE.storageName); window.localStorage.removeItem(storageKey("remember")); window.sessionStorage.removeItem(storageKey("session")); } catch (error) { /* nothing saved here */ } }   // older versions kept scrambled passwords in the browser: remove them
   state = isStudent() ? loadStudentState(db.students[session.email]) : freshState();
   ui = freshUi();
   checkConfig();
