@@ -18,7 +18,7 @@ jobs:
           git apply --ignore-whitespace --check update.patch
           git apply --ignore-whitespace update.patch
           rm update.patch
-          echo "c37fcd3f2c14c7d995aeef2614108eced5142f905d1b3256292d3141868abe7c  index.html" | sha256sum -c -
+          echo "e70bb147c3f68a32c2c1f39ebf68d7202e6b63e1df9158b6424b4898b8bd8be0  index.html" | sha256sum -c -
           git rm -r -q update .github/workflows/apply-update.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
