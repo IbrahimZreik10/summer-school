@@ -1,0 +1,144 @@
+@@ -2264,7 +2354,7 @@
+       summaryReply: "Summary of today's {course} session (simulated from this device's data)\n\n• Group: {level}, {students} students with survey results\n• Attendance this week: {attendance}%\n• Suggested follow-up: recap the hardest step at the start of the next class, and remind students about this week's assignment.",
+       attendanceReply: "Average attendance in the {level} group this week: {value}%.",
+       overviewReply: "The {level} group: {count} students with survey results, average score {average} / {max}. Open Student results for the full list.",
+-      helpReply: "I can help with:\n• drafting a reminder email for your group\n• finding students who need support\n• drafting an assignment brief\n• summarising a session\n• attendance and group overviews\n\nTry one of the suggestions below.",
++      helpReply: "Here is what you can ask me:\n\nStudents\n• How many students do I have?\n• List my students\n• Which students need support?\n• Who are my top students?\n• Who hasn't finished the survey?\n• Tell me about ibz4000\n\nResults\n• How is my group doing?\n• Which skills are weakest?\n• Who is struggling with maths?\n• Compare the groups\n\nAttendance\n• Who attended my last class?\n• Who was absent?\n\nTeaching\n• When is my next class?\n• Which times did students choose?\n• Who is in my 13:00 class?\n• Plan my next lesson\n• Give me a warm-up for my class\n• Tips for teaching writing\n\nAssignments and messages\n• What assignments are due?\n• Draft an assignment brief\n• Draft a reminder email\n\nProgramme\n• Which workshops are there?\n• Materials for my course\n• What are the rules on AI?\n• Support contacts · Activities · Fees · What week is it?",
+     },
+   },
+ };
+@@ -5878,11 +5968,14 @@
+   save();
+   drawChat(true);
+   window.setTimeout(function () {
+-    const reply = assistantReply(text, prof);
+-    messages.push(Object.assign({ from: "assistant", at: new Date().toISOString() }, reply));
+-    db.chats[prof.id] = messages.slice(-60);
+-    save();
+-    drawChat(false);
++    Promise.resolve().then(function () { return assistantReply(text, prof); })
++      .catch(function () { return { text: TEXT.staff.assistant.helpReply }; })
++      .then(function (reply) {
++        messages.push(Object.assign({ from: "assistant", at: new Date().toISOString() }, reply));
++        db.chats[prof.id] = messages.slice(-60);
++        save();
++        drawChat(false);
++      });
+   }, prefersReducedMotion() ? 150 : 650);
+ }
+ function copyText(text, button) {
+@@ -5918,7 +6011,7 @@
+   drawChat(false);
+ }
+ // Chooses a reply from simple keyword rules, using the data on this device.
+-function assistantReply(text, prof) {
++function assistantReplyBasic(text, prof) {
+   const words = TEXT.staff.assistant;
+   const lower = text.toLowerCase();
+   const courses = professorCourses(prof);
+@@ -5977,6 +6070,462 @@
+   return { text: words.helpReply };
+ }
+ 
++/* ---------- 8c. The professors' assistant ----------
++   Simulated (no outside AI, nothing leaves the site). It reads the
++   question, works out what it is about (a student, a skill, attendance,
++   the timetable, assignments...) and answers from the site's own data and
++   ASSISTANT_KNOWLEDGE. Replies are { text } objects; kind "draft" adds a
++   Copy button. Questions about attendance read the database, so the reply
++   can be a Promise. */
++function aNorm(text) {
++  return " " + String(text || "").toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9@.:\s-]/g, " ").replace(/\s+/g, " ").trim() + " ";
++}
++function aHas(t, words) { return words.some(function (w) { return t.indexOf(w) !== -1; }); }
++function aList(lines) { return lines.map(function (line) { return "• " + line; }).join("\n"); }
++function aNum(value) { return typeof value === "number" ? value.toFixed(1) : "–"; }
++function aUnique(list) { return list.filter(function (x, i) { return list.indexOf(x) === i; }); }
++function aSkillIn(t) {
++  const keys = {
++    ai: [" ai ", "artificial", "chatgpt", "chatbot"],
++    writing: ["writing", "referenc", "essay", "paraphras", "citation"],
++    maths: ["math", "algebra", "calcul", "equation"],
++    programming: ["program", "python", "coding", " code "],
++    critical: ["critical", "thinking", "evidence", "judging sources"],
++    teamwork: ["teamwork", "team work", "group work", "collaborat"],
++    time: ["time management", "deadlines", "organis", "organiz", "planning"],
++  };
++  const id = Object.keys(keys).find(function (k) { return aHas(t, keys[k]); });
++  return id ? findById(SURVEY_SKILLS, id) : null;
++}
++function aLevelIn(t) { return LEVELS.find(function (l) { return t.indexOf(" " + l.name.toLowerCase()) !== -1 || t.indexOf(" " + l.id) !== -1; }) || null; }
++function aThresholds() {
++  return sortedLevels().map(function (l, i, arr) {
++    const next = arr[i + 1];
++    return l.name + ": " + (i === 0 && next ? "below " + next.minAverage : (next ? l.minAverage + " to under " + next.minAverage : l.minAverage + " and above"));
++  }).join("; ");
++}
++function aCourseSkill(course) { return course ? findById(SURVEY_SKILLS, String(course.id).split("-").pop()) : null; }
++function aContext(prof) {
++  const courses = professorCourses(prof);
++  const levels = aUnique(courses.map(function (c) { return c.level; }));
++  const all = studentRecords();
++  const mine = all.filter(function (r) { return r.completed && r.level && levels.indexOf(r.level.id) !== -1; });
++  return {
++    prof: prof, courses: courses, levels: levels, course: courses[0] || null, all: all, mine: mine, max: scaleMax(),
++    groupName: levels.length ? levels.map(function (id) { return levelById(id).name; }).join(" and ") : "your",
++  };
++}
++function aCourseIn(t, ctx) {
++  return ctx.courses.find(function (c) { return t.indexOf(c.name.toLowerCase()) !== -1 || t.indexOf(c.id) !== -1; }) || ctx.course;
++}
++function aStudentIn(t, records) {
++  return records.find(function (r) {
++    return t.indexOf(" " + r.name.toLowerCase() + " ") !== -1 || t.indexOf(" " + r.name.toLowerCase() + "s ") !== -1 || t.indexOf(r.email.toLowerCase()) !== -1;
++  }) || null;
++}
++function aUsernameIn(t) { const m = / ([a-z]{2,5}[0-9]{2,5})(@[a-z.]+)? /.exec(t); return m ? m[1] : null; }
++function aSkillAverages(records) {
++  return SURVEY_SKILLS.map(function (skill) {
++    const values = records.map(function (r) {
++      const s = r.skillScores.find(function (x) { return x.skill.id === skill.id; });
++      return s ? s.average : null;
++    }).filter(function (v) { return typeof v === "number"; });
++    return { skill: skill, average: values.length ? mean(values) : null };
++  }).filter(function (x) { return x.average !== null; }).sort(function (a, b) { return a.average - b.average; });
++}
++function aPicks(email) {
++  const st = db.students[email] || {};
++  return st.timetable && st.timetable.picks ? st.timetable.picks : {};
++}
++function aSlotText(course, index) {
++  const slot = slotFor(course, index);
++  return timeRange(slot.start, slot.end);
++}
++function aPickedCount(course, index) {
++  return Object.keys(db.students).filter(function (email) { return aPicks(email)[course.id] === index; }).length;
++}
++function aDateText(date) { return date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }); }
++function aTimeText(iso) {
++  const d = new Date(iso);
++  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) + ", " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
++}
++
++// Attendance sessions this professor started, with who checked in.
++function aAttendance() {
++  if (typeof attendanceSupported !== "function" || !attendanceSupported()) return Promise.resolve(null);
++  return online.client.from("attendance_sessions").select("id, course_id, course_name, started_at, ended_at")
++    .eq("professor_user", online.uid).order("started_at", { ascending: false }).limit(60)
++    .then(function (res) {
++      if (res.error) return null;
++      const sessions = res.data || [];
++      if (!sessions.length) return { sessions: [], rows: [] };
++      return online.client.from("attendance").select("session_id, email, checked_at")
++        .in("session_id", sessions.map(function (s) { return s.id; }))
++        .then(function (r2) { return { sessions: sessions, rows: r2.error ? [] : (r2.data || []) }; });
++    }, function () { return null; });
++}
++function aGroupFor(course, ctx) { return ctx.all.filter(function (r) { return r.completed && r.level && r.level.id === course.level; }); }
++
++/* ---- Answers ---- */
++const ASSISTANT_INTENTS = [
++  { id: "greeting", test: function (t) { return /^ (hi|hello|hey|hiya|salam|salaam|marhaba|good (morning|afternoon|evening)) ?(there )?(assistant )?$/.test(t); },
++    answer: function (t, ctx) { return { text: fill(TEXT.staff.assistant.greeting, { name: ctx.prof.name }) }; } },
++  { id: "thanks", test: function (t) { return aHas(t, [" thank", " thx ", " cheers ", " appreciate"]); },
++    answer: function () { return { text: "You're welcome. Ask me anything else about your students, classes or teaching." }; } },
