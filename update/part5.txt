@@ -1,0 +1,77 @@
++      onSnapshot: function (next, fail) {
++        return listen(w.t.table, w.t.key + "=eq." + w.id,
++          function () { return client.from(w.t.table).select("*").eq(w.t.key, w.id).maybeSingle(); },
++          function (row) { next(snapshot(w.id, row ? fromRow(w, row) : null)); }, fail);
++      },
++    };
++  }
++  function collection(path) {
++    const w = where(path + "/all");
++    return {
++      path: path,
++      onSnapshot: function (next, fail) {
++        return listen(w.t.table, null,
++          function () { return client.from(w.t.table).select("*"); },
++          function (rows) {
++            const docs = (rows || []).map(function (row) { return snapshot(row[w.t.key], fromRow(w, row)); });
++            next({ docs: docs, size: docs.length, empty: !docs.length, metadata: { fromCache: false, hasPendingWrites: false } });
++          }, fail);
++      },
++    };
++  }
++  return { doc: doc, collection: collection };
++}
++// Website version: connect to Supabase and, if this browser is already signed in, carry on.
++function startWeb() {
++  if (!ONLINE_DATABASE || !ONLINE_DATABASE.url || !ONLINE_DATABASE.publicKey ||
++      String(ONLINE_DATABASE.url).indexOf("%%") !== -1 || String(ONLINE_DATABASE.publicKey).indexOf("%%") !== -1 ||
++      !(window.supabase && typeof window.supabase.createClient === "function")) { online.status = "config"; return; }
++  const consent = loadConsent();
++  let area;
++  try { area = consent && consent.remember ? window.localStorage : window.sessionStorage; area.getItem("ssic"); } catch (error) { area = undefined; }
++  try {
++    online.client = window.supabase.createClient(ONLINE_DATABASE.url, ONLINE_DATABASE.publicKey,
++      { auth: { persistSession: true, autoRefreshToken: true, storage: area } });
++  } catch (error) { online.status = "config"; return; }
++  online.status = "connecting";
++  online.client.auth.getSession().then(function (result) {
++    const s = result && result.data && result.data.session;
++    if (s && s.user) return enterWeb(s.user, null);
++    online.status = "off";
++    render({ keepFocusScroll: true });
++  }).catch(function () { online.status = "off"; render({ keepFocusScroll: true }); });
++}
++// After signing in: professors (listed in the staff table) get the professor pages,
++// everyone else is a student and gets their saved progress back.
++function enterWeb(user, event) {
++  online.email = String(user.email || "").toLowerCase();
++  online.pendingEvent = event || null;
++  return online.client.from("staff").select("professor_id").maybeSingle().then(function (result) {
++    if (result.error && /^(42P01|PGRST20[2-5])$/.test(String(result.error.code || ""))) {
++      online.status = "setup";
++      render({ keepFocusScroll: true });
++      return;
++    }
++    const row = result.error ? null : result.data;
++    goOnline(supabaseBase(online.client), user.id, !!row);
++    if (row) {
++      const prof = findById(PROFESSORS, row.professor_id) || PROFESSORS[0];
++      session = { role: "professor", email: prof.name, professorId: prof.id };
++      state = freshState();
++      ui = freshUi();
++      online.pendingEvent = null;
++      ui.signInNotice = fill(TEXT.login.welcomeBackNotice, { name: prof.name });
++      saveSession();
++      render({ focusId: "screen-heading", scrollTop: true });
++    }
++  }, function () { online.status = "problem"; render({ keepFocusScroll: true }); });
++}
++function webSignInBar() {
++  const words = TEXT.login;
++  const ww = TEXT.web;
++  const waiting = online.on ? !online.greeted : online.status === "connecting";
++  const min = Number(LOGIN.minimumPasswordLength) || 8;
++  return h("section", { class: "account-bar" + (ui.loginOpen ? " is-open" : ""), id: "account-bar", "aria-label": words.regionLabel },
++    h("div", { class: "account-inner" },
++      h("div", { class: "login-summary" },
++        h("p", { class: "login-title" }, h("span", { class: "login-title-wide" }, words.title), h("span", { class: "login-title-narrow" }, words.collapsedText)),
