@@ -1536,10 +1536,8 @@ const MATERIALS = [
    --------------------------------------------------------------------- */
 const FEES = [
   { item: "Summer school tuition", amount: "AED 2,000", tbc: false, note: "Per student. Covers all four courses (AED 500 each, 20 credits in total) and the workshops." },
-  { item: "Registration and admin fee", amount: "AED 50", tbc: false, note: "Operational fee, paid once with Instalment 1. Covers enrolment, your student record and your certificate. Non-refundable." },
-  { item: "Student ID and campus access", amount: "AED 25", tbc: false, note: "Operational fee, paid once with Instalment 1. Covers your summer school ID card and campus entry." },
   { item: "Learning materials and software", amount: "Included", tbc: false, note: "Provided by the university at no extra cost." },
-  { item: "Activities and trip (optional)", amount: "AED 5–15", tbc: false, note: "A small fee for the trip, only if you join it." },
+  { item: "Summer school trip (optional)", amount: "AED 5–15", tbc: false, note: "A small fee for the trip, only if you join it." },
 ];
 
 
@@ -1558,17 +1556,20 @@ const PAYMENT_PLAN = [
    tbc: true shows a "To be confirmed" label. Add or remove a line.
    course: (optional) "ai", "teamwork", "programming" or "time" shows the
            activity under that course on the Full timetable page.
+   required: true shows a "Required" label: every student must attend.
+   day, time: (optional) a fixed slot. It is added to the week on the
+           Full timetable page, e.g. day: "Friday", time: "10:00 – 12:00".
    --------------------------------------------------------------------- */
 const ACTIVITIES = [
   { title: "Welcome evening", when: "Week 1, Monday after classes", tbc: true, description: "Meet your group, your professors and the summer school team." },
-  { title: "Spaghetti bridge competition", when: "Week 2, in your Teamwork and Communication classes", course: "teamwork", tbc: true,
+  { title: "Spaghetti bridge competition", when: "Week 2, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: true,
     description: "In randomised teams, build a bridge from spaghetti and glue. The bridge that holds the most weight wins." },
-  { title: "Cardboard chair challenge", when: "Week 3, in your Teamwork and Communication classes", course: "teamwork", tbc: true,
+  { title: "Cardboard chair challenge", when: "Week 3, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: true,
     description: "In new randomised teams, build a chair out of cardboard that is strong enough to sit on." },
-  { title: "AutoCAD workshop", when: "Week 2, Tuesday after classes", course: "programming", tbc: true,
-    description: "A hands-on session in the computer lab: draw your first plan in AutoCAD with help from a tutor." },
-  { title: "Public speaking workshop", when: "Week 3, Wednesday after classes", course: "teamwork", tbc: true,
-    description: "Practise presenting your ideas with confidence, in small groups and in front of the class." },
+  { title: "AutoCAD workshop", when: "Week 2, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 2", course: "programming", required: true, tbc: true,
+    description: "A hands-on session in the computer lab: draw your first plan in AutoCAD with help from a tutor. All students attend together." },
+  { title: "Public speaking workshop", when: "Week 3, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 3", course: "teamwork", required: true, tbc: true,
+    description: "Practise presenting your ideas with confidence, in small groups and in front of the class. All students attend together." },
 ];
 
 
@@ -1715,8 +1716,8 @@ const PORTAL_SECTIONS = [
    --------------------------------------------------------------------- */
 const HOME_BANNERS = [
   { page: "schedule",   photo: "built-in:lecture-hall", kicker: "Timetable",    title: "Your whole summer on one page", text: "All four courses, every class time, the competitions and the trip.", button: "Open the full timetable" },
-  { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "Tuition, operational fees and the instalment plan: what summer school costs and how to pay.", button: "View fees" },
-  { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Clubs, a trip and events outside class. Every activity is optional.", button: "See activities" },
+  { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "Tuition, what it covers and the instalment plan: what summer school costs and how to pay.", button: "View fees" },
+  { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Competitions, workshops and a trip. The competitions and workshops are required.", button: "See activities" },
   { page: "support",    photo: "built-in:lecture-hall", kicker: "Support",      title: "You are never on your own",  text: "Who to contact, and quick answers to common questions.", button: "Get support" },
   { page: "materials",  photo: "built-in:computer-lab", kicker: "Materials",    title: "Everything for your group",  text: "A guide to your group's slides, worksheets and readings, with links to Canvas.", button: "Open materials" },
 ];
@@ -2053,7 +2054,7 @@ const TEXT = {
       week:       { menu: "This week",             title: "This week",                   summary: "Your assignment, optional extra class, multisport, reminders and attendance." },
       materials:  { menu: "Materials",             title: "Materials for the {level} group", summary: "Slides, readings and worksheets for your group." },
       fees:       { menu: "Fees",                  title: "Fees and payments",           summary: "What summer school costs and how to pay." },
-      activities: { menu: "Activities",            title: "Student activities",          summary: "Clubs, a trip and events outside class." },
+      activities: { menu: "Activities",            title: "Student activities",          summary: "Competitions, workshops, events and the trip." },
       support:    { menu: "Support and Q&A",       title: "Support and questions",       summary: "Who to contact, and answers to common questions." },
       book:       { menu: "Book of the week",      title: "Book of the week",            summary: "A recommended read that changes every week." },
       ai:         { menu: "How this portal runs",  title: "How this portal runs",        summary: "How AI agents help run the portal fairly." },
@@ -2139,7 +2140,7 @@ const TEXT = {
       totalLabel: "Total",
       creditsValue: "{credits} credits",
       planTitle: "Instalment plan",
-      planIntro: "You can pay the AED 2,000 tuition in two equal instalments instead of all at once. There is no extra charge for paying in instalments. The operational fees (AED 75 in total) are paid once, with Instalment 1.",
+      planIntro: "You can pay the AED 2,000 tuition in two equal instalments instead of all at once. There is no extra charge for paying in instalments.",
       planHeader: "Instalment",
       amountColHeader: "Amount",
       dueHeader: "Due",
@@ -2148,7 +2149,7 @@ const TEXT = {
       contact: "Questions about fees? Contact the summer school office (see Support and Q&A).",
     },
     activities: {
-      intro: "Meet people and take a break from study. Every activity is optional.",
+      intro: "Meet people and learn by doing. The competitions and workshops are part of your timetable and every student takes part.",
     },
     schedule: {
       intro: "Everything that happens at summer school, in one place. Your group has {count} courses and each one meets twice a week.",
@@ -2163,6 +2164,9 @@ const TEXT = {
       tripsTitle: "Trip",
       tripsIntro: "The trip is optional and has a small fee of AED 5–15, paid only if you go.",
       tripFee: "Fee: {fee}",
+      required: "Required",
+      optional: "Optional",
+      workshopDay: "Workshops for all students",
       myTimetableButton: "Open my timetable",
     },
     support: {
@@ -5398,8 +5402,9 @@ function paymentPlanTable(words) {
 
 // Student activities banner
 function activityItem(a) {
+  const words = TEXT.portal.schedule;
   return h("li", {},
-    h("strong", {}, a.title),
+    h("strong", {}, a.title), " ", a.required ? badge(words.required, "neutral") : badge(words.optional, "optional"),
     h("p", { class: "small muted" }, a.when, a.tbc ? [" ", tbcBadge()] : null),
     h("p", {}, a.description)
   );
@@ -5423,6 +5428,13 @@ function sectionActivities(sec) {
       ] : null
     )
   );
+}
+
+// Days outside the class days that have a fixed activity (for example Friday workshops).
+function extraDays() {
+  const out = [];
+  ACTIVITIES.forEach(function (a) { if (a.day && TIMETABLE.classDays.indexOf(a.day) === -1 && out.indexOf(a.day) === -1) out.push(a.day); });
+  return out;
 }
 
 // Full timetable: every course, class time, activity and the trip on one page.
@@ -5462,6 +5474,18 @@ function sectionSchedule(sec, ctx) {
             h("p", { class: "class-meta" }, c.room || TIMETABLE.defaultRoom)
           );
         })) : h("p", { class: "muted small", style: "margin:8px 0 0" }, TEXT.portal.timetable.noClasses)
+      );
+    }), extraDays().map(function (day) {
+      return h("div", { class: "day-col" },
+        h("h3", {}, day),
+        h("p", { class: "muted small", style: "margin:0 0 6px" }, words.workshopDay),
+        h("ul", { class: "plain-list" }, ACTIVITIES.filter(function (a) { return a.day === day; }).map(function (a) {
+          return h("li", { class: "class-block" },
+            h("p", { class: "class-name" }, a.title, " ", a.required ? badge(words.required, "neutral") : null),
+            h("p", { class: "class-time" }, (a.week ? a.week + ", " : "") + a.time),
+            a.tbc ? h("p", { class: "class-meta" }, tbcBadge()) : null
+          );
+        }))
       );
     })),
     h("h2", { style: "margin-top:28px" }, words.activitiesTitle),
@@ -6562,7 +6586,7 @@ const ASSISTANT_INTENTS = [
         aThresholds() + "." };
     } },
   { id: "activities", test: function (t) { return aHas(t, ["activities", "club", "trip", "event", "social", "hackathon", "tour", "extracurricular", "welcome evening"]) && !aHas(t, ["activities for", "recent", "latest"]); },
-    answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
+    answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + (a.required ? " (required)" : " (optional)") + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
       (TRIPS.length ? "\n\nTrip (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
   { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much", "instalment", "installment"]); },
     answer: function (t, ctx) {
