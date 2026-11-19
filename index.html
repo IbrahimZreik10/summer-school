@@ -1542,6 +1542,16 @@ const FEES = [
 
 
 /* ---------------------------------------------------------------------
+   PAYMENT_PLAN: the tuition instalment plan on the Fees page.
+   Each line is one instalment. Add or remove a line to change the plan.
+   --------------------------------------------------------------------- */
+const PAYMENT_PLAN = [
+  { label: "Instalment 1", amount: "AED 1,000", due: "Before summer school starts, to confirm your place" },
+  { label: "Instalment 2", amount: "AED 1,000", due: "By the end of week 2" },
+];
+
+
+/* ---------------------------------------------------------------------
    ACTIVITIES: the student activities banner and the Full timetable page.
    tbc: true shows a "To be confirmed" label. Add or remove a line.
    course: (optional) "ai", "teamwork", "programming" or "time" shows the
@@ -2126,6 +2136,11 @@ const TEXT = {
       feeHeader: "Fee",
       totalLabel: "Total",
       creditsValue: "{credits} credits",
+      planTitle: "Instalment plan",
+      planIntro: "You can pay the AED 2,000 tuition in two equal instalments instead of all at once. There is no extra charge for paying in instalments.",
+      planHeader: "Instalment",
+      amountColHeader: "Amount",
+      dueHeader: "Due",
       itemHeader: "What it covers",
       amountHeader: "Amount",
       contact: "Questions about fees? Contact the summer school office (see Support and Q&A).",
@@ -5324,6 +5339,7 @@ function sectionFees(sec, ctx) {
       );
     })),
     courseFeeTable(ctx && ctx.level ? coursesForLevel(ctx.level.id) : [], words),
+    paymentPlanTable(words),
     h("div", { class: "card-grid", style: "margin-top:16px" },
       h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.payTitle), h("p", {}, words.payText)),
       h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.helpTitle), h("p", {}, words.contact),
@@ -5355,6 +5371,24 @@ function courseFeeTable(courses, words) {
           h("tr", {}, h("td", {}, h("strong", {}, words.totalLabel)), h("td", {}, ""),
             h("td", {}, h("strong", {}, fill(words.creditsValue, { credits: totalCredits }))), h("td", { class: "fee-amount" }, total))
         )
+      )
+    )
+  );
+}
+
+// Tuition instalment plan.
+function paymentPlanTable(words) {
+  if (!PAYMENT_PLAN.length) return null;
+  return h("div", { style: "margin-top:24px" },
+    h("h2", {}, words.planTitle),
+    h("p", { class: "muted" }, words.planIntro),
+    h("div", { class: "table-wrap" },
+      h("table", { class: "fee-table" },
+        h("thead", {}, h("tr", {},
+          h("th", { scope: "col" }, words.planHeader), h("th", { scope: "col" }, words.amountColHeader), h("th", { scope: "col" }, words.dueHeader))),
+        h("tbody", {}, PAYMENT_PLAN.map(function (p) {
+          return h("tr", {}, h("td", {}, p.label), h("td", { class: "fee-amount" }, p.amount), h("td", {}, p.due));
+        }))
       )
     )
   );
@@ -6528,12 +6562,13 @@ const ASSISTANT_INTENTS = [
   { id: "activities", test: function (t) { return aHas(t, ["activities", "club", "trip", "event", "social", "hackathon", "tour", "extracurricular", "welcome evening"]) && !aHas(t, ["activities for", "recent", "latest"]); },
     answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
       (TRIPS.length ? "\n\nTrip (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
-  { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much"]); },
+  { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much", "instalment", "installment"]); },
     answer: function (t, ctx) {
       const kinds = [];
       COURSES.forEach(function (c) { const k = String(c.id).split("-").pop(); if (COURSE_DETAILS[k] && !kinds.some(function (x) { return x.k === k; })) kinds.push({ k: k, name: c.name }); });
       return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) +
-        (kinds.length ? "\n\nTuition by course:\n" + aList(kinds.map(function (x) { return x.name + ": " + COURSE_DETAILS[x.k].credits + " credits, " + COURSE_DETAILS[x.k].fee; })) : "") };
+        (kinds.length ? "\n\nTuition by course:\n" + aList(kinds.map(function (x) { return x.name + ": " + COURSE_DETAILS[x.k].credits + " credits, " + COURSE_DETAILS[x.k].fee; })) : "") +
+        (PAYMENT_PLAN.length ? "\n\nInstalment plan:\n" + aList(PAYMENT_PLAN.map(function (p) { return p.label + ": " + p.amount + ", " + p.due.charAt(0).toLowerCase() + p.due.slice(1); })) : "") };
     } },
   { id: "dates", test: function (t) { return aHas(t, ["what week", "which week", "week is it", "start date", "programme start", "program start", "when did", "when does summer", "class days", "which days"]); },
     answer: function () {
