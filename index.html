@@ -483,6 +483,7 @@ button, input, select { font: inherit; }
 .row-list { list-style: none; padding: 0; margin: 0; }
 .row-list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
 .row-list li:last-child { border-bottom: 0; }
+.guide-video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: #0b1f3a; margin: 4px 0 10px; }
 .help-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 14px; }
 .video-box {
   aspect-ratio: 16 / 9; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
@@ -1634,14 +1635,22 @@ const BOOKS = [
 
 
 /* ---------------------------------------------------------------------
-   HELP_RESOURCES: the "How to use this website" section.
-   videoUrl: link to the walkthrough video. Leave "" for a placeholder.
-   pdfUrl:   link to the website guide PDF. Leave "" for a placeholder.
-   A file next to index.html works too, e.g. "guide.pdf" or "walkthrough.mp4".
+   HELP_RESOURCES: the walkthrough videos and PDF guides.
+   Students see theirs on "How to use this site"; professors see theirs on
+   the Guide page of the professor pages.
+   videoUrl / pdfUrl:           the student video and PDF guide.
+   staffVideoUrl / staffPdfUrl: the professor video and PDF guide.
+   videoPoster / staffVideoPoster: the picture shown before the video plays.
+   Leave a link "" to show a placeholder. A file in the website's folders
+   works, e.g. "guides/student-guide.mp4". A .mp4 file plays on the page.
    --------------------------------------------------------------------- */
 const HELP_RESOURCES = {
-  videoUrl: "",
-  pdfUrl: "",
+  videoUrl: "guides/student-guide.mp4",
+  videoPoster: "",
+  pdfUrl: "guides/student-guide.pdf",
+  staffVideoUrl: "guides/professor-guide.mp4",
+  staffVideoPoster: "",
+  staffPdfUrl: "guides/professor-guide.pdf",
 };
 
 
@@ -2085,7 +2094,7 @@ const TEXT = {
       intro: "New to the portal? Watch the short video or read the guide. The menu at the top stays with you as you scroll.",
       videoTitle: "Walkthrough video",
       videoPlaceholder: "The walkthrough video will appear here.",
-      videoButton: "Watch the walkthrough video",
+      videoButton: "Open the video in a new tab",
       pdfTitle: "Website guide (PDF)",
       pdfText: "A printable guide to every part of this portal.",
       pdfButton: "Open the website guide (PDF)",
@@ -2271,6 +2280,16 @@ const TEXT = {
       assignments: { menu: "Assignment board", title: "Assignment board" },
       console:     { menu: "AI & Staff Console", title: "AI & Staff Console" },
       assistant:   { menu: "My assistant",     title: "My assistant" },
+      guide:       { menu: "Guide",            title: "How to use the professor pages" },
+    },
+    guide: {
+      intro: "A short video and a printable guide to every professor page: results, attendance, assignments, the console and your assistant.",
+      videoTitle: "Professor walkthrough video",
+      videoPlaceholder: "The walkthrough video will appear here.",
+      videoButton: "Open the video in a new tab",
+      pdfTitle: "Professor guide (PDF)",
+      pdfText: "A printable step-by-step guide to the professor pages.",
+      pdfButton: "Open the professor guide (PDF)",
     },
     overview: {
       students: "Students",
@@ -5152,23 +5171,30 @@ function sectionTimetable(sec, ctx) {
 }
 
 // How to use this website
+// The walkthrough video and PDF guide, side by side.
+function guideCards(words, videoUrl, poster, pdfUrl) {
+  const isFile = /\.(mp4|webm)(\?|$)/i.test(videoUrl || "");
+  return h("div", { class: "help-grid" },
+    h("div", { class: "mini-card" },
+      h("div", { class: "mini-card-head" }, h("h3", {}, words.videoTitle), videoUrl ? null : badge(TEXT.comingSoonBadge, "tbc")),
+      !videoUrl ? h("div", { class: "video-box" }, h("span", { class: "video-play", "aria-hidden": "true" }, "▶"), h("span", {}, words.videoPlaceholder))
+        : isFile ? h("video", { class: "guide-video", src: poster ? videoUrl : videoUrl + "#t=1.5", poster: poster || null, controls: true, preload: "metadata", playsinline: true, "aria-label": words.videoTitle })
+        : h("a", { class: "btn btn-primary", href: videoUrl, target: "_blank", rel: "noopener" }, words.videoButton),
+      videoUrl && isFile ? h("a", { class: "small", href: videoUrl, target: "_blank", rel: "noopener" }, words.videoButton) : null
+    ),
+    h("div", { class: "mini-card" },
+      h("div", { class: "mini-card-head" }, h("h3", {}, words.pdfTitle), pdfUrl ? null : badge(TEXT.comingSoonBadge, "tbc")),
+      h("div", { class: "pdf-box" }, h("span", { class: "pdf-icon", "aria-hidden": "true" }, "PDF"), h("p", {}, words.pdfText)),
+      pdfUrl ? h("a", { class: "btn btn-primary", href: pdfUrl, target: "_blank", rel: "noopener" }, words.pdfButton) : null
+    )
+  );
+}
+
 function sectionHelp(sec, ctx) {
   const words = TEXT.portal.help;
   return sectionWrap(sec, null,
     h("p", {}, words.intro),
-    h("div", { class: "help-grid" },
-      h("div", { class: "mini-card" },
-        h("div", { class: "mini-card-head" }, h("h3", {}, words.videoTitle), HELP_RESOURCES.videoUrl ? null : badge(TEXT.comingSoonBadge, "tbc")),
-        HELP_RESOURCES.videoUrl
-          ? h("a", { class: "btn btn-primary", href: HELP_RESOURCES.videoUrl, target: "_blank", rel: "noopener" }, words.videoButton)
-          : h("div", { class: "video-box" }, h("span", { class: "video-play", "aria-hidden": "true" }, "▶"), h("span", {}, words.videoPlaceholder))
-      ),
-      h("div", { class: "mini-card" },
-        h("div", { class: "mini-card-head" }, h("h3", {}, words.pdfTitle), HELP_RESOURCES.pdfUrl ? null : badge(TEXT.comingSoonBadge, "tbc")),
-        h("div", { class: "pdf-box" }, h("span", { class: "pdf-icon", "aria-hidden": "true" }, "PDF"), h("p", {}, words.pdfText)),
-        HELP_RESOURCES.pdfUrl ? h("a", { class: "btn btn-primary", href: HELP_RESOURCES.pdfUrl, target: "_blank", rel: "noopener" }, words.pdfButton) : null
-      )
-    ),
+    guideCards(words, HELP_RESOURCES.videoUrl, HELP_RESOURCES.videoPoster, HELP_RESOURCES.pdfUrl),
     h("div", { class: "mini-card" },
       h("h3", {}, words.whereTitle),
       h("p", { class: "muted small" }, words.whereIntro),
@@ -5614,7 +5640,7 @@ function sectionExtra(sec, entry) {
 
 /* ---------- 8b. Staff console (professors) ---------- */
 function staffSections() {
-  const builders = { overview: staffOverview, results: staffResults, attendance: staffAttendance, assignments: staffAssignments, console: staffConsole, assistant: staffAssistant };
+  const builders = { overview: staffOverview, results: staffResults, attendance: staffAttendance, assignments: staffAssignments, console: staffConsole, assistant: staffAssistant, guide: staffGuide };
   return Object.keys(builders).map(function (key) {
     const words = TEXT.staff.sections[key];
     // The overview sits under the page's own welcome heading, so it is a sub-section.
@@ -5692,6 +5718,15 @@ function screenStaff(sections, page) {
     h("p", { class: "notice notice-info", style: "margin-top:20px" }, online.on ? TEXT.staff.onlineNote : TEXT.staff.demoNote),
     current.build(current, ctx),
     staffActivity()
+  );
+}
+
+// Guide: the professor walkthrough video and PDF guide.
+function staffGuide(sec) {
+  const words = TEXT.staff.guide;
+  return sectionWrap(sec, null,
+    h("p", {}, words.intro),
+    guideCards(words, HELP_RESOURCES.staffVideoUrl, HELP_RESOURCES.staffVideoPoster, HELP_RESOURCES.staffPdfUrl)
   );
 }
 
