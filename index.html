@@ -1189,7 +1189,7 @@ const LEVELS = [
    Write all times as 24-hour "HH:MM", for example "09:40" or "17:45".
    --------------------------------------------------------------------- */
 const TIMETABLE = {
-  classDays: ["Monday", "Wednesday", "Thursday"],
+  classDays: ["Monday", "Tuesday", "Wednesday", "Thursday"],
   classDaysTbc: true,
   dayStart: "09:40",
   dayEnd: "17:45",
@@ -1228,12 +1228,6 @@ const PROFESSORS = [
   { id: "prof-j", name: "Professor J", tbc: true, email: "", password: "" },
   { id: "prof-k", name: "Professor K", tbc: true, email: "", password: "" },
   { id: "prof-l", name: "Professor L", tbc: true, email: "", password: "" },
-  { id: "prof-m", name: "Professor M", tbc: true, email: "", password: "" },
-  { id: "prof-n", name: "Professor N", tbc: true, email: "", password: "" },
-  { id: "prof-o", name: "Professor O", tbc: true, email: "", password: "" },
-  { id: "prof-p", name: "Professor P", tbc: true, email: "", password: "" },
-  { id: "prof-q", name: "Professor Q", tbc: true, email: "", password: "" },
-  { id: "prof-r", name: "Professor R", tbc: true, email: "", password: "" },
 ];
 
 
@@ -1243,7 +1237,11 @@ const PROFESSORS = [
    level:      which group takes it: "foundation", "developing" or "advanced".
    name:       course name students see.
    professor:  the professor's id from PROFESSORS.
-   day:        1, 2 or 3 = first, second or third day in TIMETABLE.classDays.
+   day:        the first class day of the week: 1 = first day in
+               TIMETABLE.classDays, 2 = second day, and so on.
+   day2:       the second class day of the week. The class runs at the
+               same time on both days, so students choose one time.
+   description: one or two sentences shown on the Full timetable page.
    times:      the professor's three start times, spread across the day.
                Each class lasts TIMETABLE.classLengthMinutes.
    Optional extras you can add to a line:
@@ -1254,28 +1252,34 @@ const PROFESSORS = [
    --------------------------------------------------------------------- */
 const COURSES = [
   // Foundation group
-  { id: "fnd-ai",          level: "foundation", name: "AI Basics for University Study",          professor: "prof-a", day: 1, times: ["09:40", "13:00", "15:10"] },
-  { id: "fnd-writing",     level: "foundation", name: "Writing and Referencing Essentials",      professor: "prof-b", day: 1, times: ["11:20", "14:40", "16:15"] },
-  { id: "fnd-maths",       level: "foundation", name: "Maths Refresher",                         professor: "prof-c", day: 2, times: ["10:00", "12:30", "15:00"] },
-  { id: "fnd-programming", level: "foundation", name: "First Steps in Python",                   professor: "prof-d", day: 2, times: ["11:40", "14:10", "16:10"] },
-  { id: "fnd-critical",    level: "foundation", name: "Judging Sources and Evidence",            professor: "prof-e", day: 3, times: ["09:40", "12:10", "14:50"] },
-  { id: "fnd-teamwork",    level: "foundation", name: "Teamwork and Study Habits",               professor: "prof-f", day: 3, times: ["11:20", "13:50", "16:15"] },
+  { id: "fnd-ai",          level: "foundation", name: "AI: How to Use It Responsibly", professor: "prof-a", day: 1, day2: 3, times: ["09:40", "13:00", "15:10"],
+    description: "When AI tools help and when they don't, how to check what they tell you, and how to say that you used them." },
+  { id: "fnd-teamwork",    level: "foundation", name: "Teamwork and Communication",    professor: "prof-b", day: 1, day2: 3, times: ["11:20", "14:40", "16:15"],
+    description: "Work in randomised teams and learn to share ideas clearly. Includes the spaghetti bridge and cardboard chair competitions." },
+  { id: "fnd-programming", level: "foundation", name: "Technical and Software Skills", professor: "prof-c", day: 2, day2: 4, times: ["10:00", "12:30", "15:00"],
+    description: "Beginner tutorials in engineering software such as AutoCAD and Rhino. No experience needed." },
+  { id: "fnd-time",        level: "foundation", name: "Time Management",               professor: "prof-d", day: 2, day2: 4, times: ["11:40", "14:10", "16:10"],
+    description: "A fun, interactive class where you meet current students and professors and get their advice on managing your time." },
 
   // Developing group
-  { id: "dev-ai",          level: "developing", name: "Using AI Responsibly in STEM",            professor: "prof-g", day: 1, times: ["10:00", "12:30", "15:00"] },
-  { id: "dev-writing",     level: "developing", name: "Academic Writing and Referencing",        professor: "prof-h", day: 1, times: ["11:40", "14:10", "16:10"] },
-  { id: "dev-maths",       level: "developing", name: "Maths for Science and Engineering",       professor: "prof-i", day: 2, times: ["09:40", "12:10", "14:50"] },
-  { id: "dev-programming", level: "developing", name: "Programming with Python",                 professor: "prof-j", day: 2, times: ["11:20", "13:50", "16:15"] },
-  { id: "dev-critical",    level: "developing", name: "Research Skills and Critical Thinking",   professor: "prof-k", day: 3, times: ["09:40", "13:00", "15:10"] },
-  { id: "dev-teamwork",    level: "developing", name: "Team Projects and Time Management",       professor: "prof-l", day: 3, times: ["11:20", "14:40", "16:15"] },
+  { id: "dev-ai",          level: "developing", name: "AI: How to Use It Responsibly", professor: "prof-e", day: 1, day2: 3, times: ["10:00", "12:30", "15:00"],
+    description: "When AI tools help and when they don't, how to check what they tell you, and how to say that you used them." },
+  { id: "dev-teamwork",    level: "developing", name: "Teamwork and Communication",    professor: "prof-f", day: 1, day2: 3, times: ["11:40", "14:10", "16:10"],
+    description: "Work in randomised teams and learn to share ideas clearly. Includes the spaghetti bridge and cardboard chair competitions." },
+  { id: "dev-programming", level: "developing", name: "Technical and Software Skills", professor: "prof-g", day: 2, day2: 4, times: ["09:40", "12:10", "14:50"],
+    description: "Beginner tutorials in engineering software such as AutoCAD and Rhino. No experience needed." },
+  { id: "dev-time",        level: "developing", name: "Time Management",               professor: "prof-h", day: 2, day2: 4, times: ["11:20", "13:50", "16:15"],
+    description: "A fun, interactive class where you meet current students and professors and get their advice on managing your time." },
 
   // Advanced group
-  { id: "adv-ai",          level: "advanced",   name: "Critical Use of AI Tools",                professor: "prof-m", day: 1, times: ["09:40", "12:10", "14:50"] },
-  { id: "adv-writing",     level: "advanced",   name: "Writing Like a Researcher",               professor: "prof-n", day: 1, times: ["11:20", "13:50", "16:15"] },
-  { id: "adv-maths",       level: "advanced",   name: "Mathematical Modelling",                  professor: "prof-o", day: 2, times: ["09:40", "13:00", "15:10"] },
-  { id: "adv-programming", level: "advanced",   name: "Computational Problem-Solving",           professor: "prof-p", day: 2, times: ["11:20", "14:40", "16:15"] },
-  { id: "adv-critical",    level: "advanced",   name: "Research Design and Evaluation",          professor: "prof-q", day: 3, times: ["10:00", "12:30", "15:00"] },
-  { id: "adv-teamwork",    level: "advanced",   name: "Leading Team Projects",                   professor: "prof-r", day: 3, times: ["11:40", "14:10", "16:10"] },
+  { id: "adv-ai",          level: "advanced",   name: "AI: How to Use It Responsibly", professor: "prof-i", day: 1, day2: 3, times: ["09:40", "12:10", "14:50"],
+    description: "When AI tools help and when they don't, how to check what they tell you, and how to say that you used them." },
+  { id: "adv-teamwork",    level: "advanced",   name: "Teamwork and Communication",    professor: "prof-j", day: 1, day2: 3, times: ["11:20", "13:50", "16:15"],
+    description: "Work in randomised teams and learn to share ideas clearly. Includes the spaghetti bridge and cardboard chair competitions." },
+  { id: "adv-programming", level: "advanced",   name: "Technical and Software Skills", professor: "prof-k", day: 2, day2: 4, times: ["09:40", "13:00", "15:10"],
+    description: "Beginner tutorials in engineering software such as AutoCAD and Rhino. No experience needed." },
+  { id: "adv-time",        level: "advanced",   name: "Time Management",               professor: "prof-l", day: 2, day2: 4, times: ["11:20", "14:40", "16:15"],
+    description: "A fun, interactive class where you meet current students and professors and get their advice on managing your time." },
 ];
 
 
@@ -1422,24 +1426,25 @@ const MULTISPORT = [
 const THIS_WEEK = {
   weekLabel: "Week 2",
   assignments: [
-    { id: "week2-fnd-writing", course: "fnd-writing", title: "Summarise an article in 250 words", due: "Thursday, 17:00", reviewedByProfessor: true,
-      details: "Read the article shared in class and summarise it in your own words. Add one reference at the end." },
-    { id: "week2-dev-writing", course: "dev-writing", title: "Short report with three references", due: "Thursday, 17:00", reviewedByProfessor: true,
-      details: "Write a 500-word report on a STEM topic you choose, with three correctly formatted references." },
-    { id: "week2-adv-writing", course: "adv-writing", title: "Literature mini-review", due: "Thursday, 17:00", reviewedByProfessor: true,
-      details: "Compare three academic sources on one research question in 800 words. State whether and how you used AI." },
+    { id: "week2-fnd-teamwork", course: "fnd-teamwork", title: "Spaghetti bridge: team sketch", due: "Wednesday, 17:00", reviewedByProfessor: true,
+      details: "With your team, sketch your bridge design and write two sentences on why you think it will be strong." },
+    { id: "week2-dev-teamwork", course: "dev-teamwork", title: "Spaghetti bridge: design and plan", due: "Wednesday, 17:00", reviewedByProfessor: true,
+      details: "Sketch your team's bridge, list who does what, and estimate how much weight it will hold." },
+    { id: "week2-adv-teamwork", course: "adv-teamwork", title: "Spaghetti bridge: design report", due: "Wednesday, 17:00", reviewedByProfessor: true,
+      details: "Write a one-page design report with a labelled sketch, team roles and a load estimate. State whether and how you used AI." },
     // Not reviewed yet, so it stays hidden until reviewedByProfessor is true:
-    { id: "week2-dev-maths", course: "dev-maths", title: "Problem set 2", due: "Monday, 17:00", reviewedByProfessor: false,
-      details: "Questions 1 to 10 from the problem set." },
+    { id: "week2-dev-programming", course: "dev-programming", title: "AutoCAD tutorial 1: a simple floor plan", due: "Thursday, 17:00", reviewedByProfessor: false,
+      details: "Follow tutorial 1 and submit your floor plan as a PDF." },
   ],
   examReminders: [
-    { levels: ["foundation", "developing", "advanced"], title: "Maths check-in quiz (practice only, not graded)", when: "Wednesday, in your maths class" },
+    { levels: ["foundation", "developing", "advanced"], title: "AI check-in quiz (practice only, not graded)", when: "Wednesday, in your AI class" },
     { levels: ["foundation", "developing", "advanced"], title: "End-of-programme assessment", when: "Final week, date to be confirmed" },
   ],
   attendance: [
     { day: 1, status: "present" },
     { day: 2, status: "present" },
     { day: 3, status: "upcoming" },
+    { day: 4, status: "upcoming" },
   ],
 };
 
@@ -1474,35 +1479,36 @@ const SAMPLE_STUDENTS = [
 const MATERIALS = [
   { levels: ["foundation", "developing", "advanced"], title: "Summer school handbook", type: "PDF", url: "",
     description: "Everything you need to know in one place: dates, rules, contacts and how summer school works." },
-  { levels: ["foundation", "developing", "advanced"], title: "Using AI responsibly: a student guide", type: "PDF", url: "",
-    description: "When you may use AI tools in your work, how to check what they tell you, and how to say that you used them." },
 
-  { levels: ["foundation"], title: "Foundation group welcome pack", type: "PDF", url: "",
-    description: "Your first-week guide: what to expect, how classes run and tips to help you settle in." },
-  { levels: ["foundation"], title: "Maths refresher worksheets", type: "PDF", course: "fnd-maths", url: "",
-    description: "Practice sheets on algebra, functions and graphs, with worked examples and answers to check your work." },
-  { levels: ["foundation"], title: "Python first steps", type: "Slides", course: "fnd-programming", url: "",
-    description: "Class slides that introduce variables, loops and conditions, with small exercises to try." },
-  { levels: ["foundation"], title: "Referencing made simple", type: "Guide", course: "fnd-writing", url: "",
-    description: "A step-by-step guide to citing your sources and building a reference list." },
+  // Foundation group: one material for each of the four courses
+  { levels: ["foundation"], title: "Using AI responsibly: a student guide", type: "PDF", course: "fnd-ai", url: "",
+    description: "When you may use AI tools, how to check what they tell you and how to say that you used them, with simple examples." },
+  { levels: ["foundation"], title: "Spaghetti bridge and cardboard chair: competition brief", type: "Guide", course: "fnd-teamwork", url: "",
+    description: "The rules, materials and judging for both team competitions, plus tips for working well in a new team." },
+  { levels: ["foundation"], title: "AutoCAD and Rhino: first steps", type: "Slides", course: "fnd-programming", url: "",
+    description: "Beginner tutorials: opening the software, drawing simple shapes and saving your work." },
+  { levels: ["foundation"], title: "Weekly planner and time tips", type: "PDF", course: "fnd-time", url: "",
+    description: "A printable weekly planner, with the best advice from current students on managing your time." },
 
-  { levels: ["developing"], title: "Developing group welcome pack", type: "PDF", url: "",
-    description: "Your first-week guide: what to expect, how classes run and how to get the most from your group." },
-  { levels: ["developing"], title: "Applied maths problem sets", type: "PDF", course: "dev-maths", url: "",
-    description: "Problem sets that apply maths to science and engineering questions, with a hint for each step." },
-  { levels: ["developing"], title: "Python programming exercises", type: "Slides", course: "dev-programming", url: "",
-    description: "Slides and exercises on functions, lists and debugging, building towards a small project." },
-  { levels: ["developing"], title: "Academic writing toolkit", type: "Guide", course: "dev-writing", url: "",
-    description: "Templates and checklists for structuring reports, paraphrasing and referencing correctly." },
+  // Developing group: one material for each of the four courses
+  { levels: ["developing"], title: "AI in STEM: checking and declaring AI use", type: "PDF", course: "dev-ai", url: "",
+    description: "How to test what AI tools tell you in science and engineering work, and how to state clearly how you used them." },
+  { levels: ["developing"], title: "Competition brief and team roles", type: "Guide", course: "dev-teamwork", url: "",
+    description: "Rules and judging for the spaghetti bridge and cardboard chair competitions, and how to share out roles in your team." },
+  { levels: ["developing"], title: "AutoCAD and Rhino tutorials: from 2D to 3D", type: "Slides", course: "dev-programming", url: "",
+    description: "Tutorials that take you from simple 2D drawings to your first 3D models." },
+  { levels: ["developing"], title: "Planning your study week", type: "PDF", course: "dev-time", url: "",
+    description: "A planner and checklist for breaking big tasks into small steps, with advice from current students." },
 
-  { levels: ["advanced"], title: "Advanced group welcome pack", type: "PDF", url: "",
-    description: "Your first-week guide, with stretch goals and advice on leading group work." },
-  { levels: ["advanced"], title: "Modelling case studies", type: "PDF", course: "adv-maths", url: "",
-    description: "Real-world modelling problems to analyse, with questions that extend your thinking." },
-  { levels: ["advanced"], title: "Algorithms challenge pack", type: "Slides", course: "adv-programming", url: "",
-    description: "Harder programming challenges on algorithms and efficiency, with test cases to check your solutions." },
-  { levels: ["advanced"], title: "Research writing templates", type: "Guide", course: "adv-writing", url: "",
-    description: "Templates for literature reviews and research reports, with examples of strong academic writing." },
+  // Advanced group: one material for each of the four courses
+  { levels: ["advanced"], title: "Critical use of AI tools: case studies", type: "PDF", course: "adv-ai", url: "",
+    description: "Real cases where AI tools got STEM work wrong, with questions on how to spot and avoid the same mistakes." },
+  { levels: ["advanced"], title: "Competition brief: design and load challenge", type: "Guide", course: "adv-teamwork", url: "",
+    description: "Rules for both competitions, with extra design and load-testing targets for teams that want a challenge." },
+  { levels: ["advanced"], title: "Engineering software projects: AutoCAD, Rhino and more", type: "Slides", course: "adv-programming", url: "",
+    description: "Tutorials and small projects that go further with AutoCAD, Rhino and other engineering software." },
+  { levels: ["advanced"], title: "Deadlines and deep work planner", type: "PDF", course: "adv-time", url: "",
+    description: "Plan big pieces of work backwards from the deadline and protect your focus time." },
 ];
 
 
@@ -1521,14 +1527,34 @@ const FEES = [
 
 
 /* ---------------------------------------------------------------------
-   ACTIVITIES: the student activities banner.
+   ACTIVITIES: the student activities banner and the Full timetable page.
    tbc: true shows a "To be confirmed" label. Add or remove a line.
+   course: (optional) "ai", "teamwork", "programming" or "time" shows the
+           activity under that course on the Full timetable page.
    --------------------------------------------------------------------- */
 const ACTIVITIES = [
   { title: "Welcome evening", when: "Week 1, Monday after classes", tbc: true, description: "Meet your group, your professors and the summer school team." },
+  { title: "Spaghetti bridge competition", when: "Week 2, in your Teamwork and Communication classes", course: "teamwork", tbc: true,
+    description: "In randomised teams, build a bridge from spaghetti and glue. The bridge that holds the most weight wins." },
+  { title: "Cardboard chair challenge", when: "Week 3, in your Teamwork and Communication classes", course: "teamwork", tbc: true,
+    description: "In new randomised teams, build a chair out of cardboard that is strong enough to sit on." },
   { title: "Robotics and coding club", when: "Wednesdays after classes", tbc: true, description: "Build and program small robots with other students." },
-  { title: "Campus and city tour", when: "Week 2, Saturday morning", tbc: true, description: "Find your way around campus and see some of Dubai." },
   { title: "Mini hackathon", when: "Week 4, Thursday afternoon", tbc: true, description: "Solve a real problem in a team, with mentors to help." },
+];
+
+
+/* ---------------------------------------------------------------------
+   TRIPS: shown under the Full timetable and on the Activities page.
+   fee: type it exactly as it should appear, e.g. "AED 10".
+   tbc: true shows a "To be confirmed" label. Add or remove a line.
+   --------------------------------------------------------------------- */
+const TRIPS = [
+  { title: "Campus and city tour", when: "Week 2, Saturday morning", fee: "AED 5–15", tbc: true,
+    description: "Find your way around campus and see some of Dubai." },
+  { title: "Engineering site visit", when: "Week 3, date to be confirmed", fee: "AED 5–15", tbc: true,
+    description: "Visit a real engineering or construction site and see how a project is run." },
+  { title: "Science and technology day out", when: "Week 4, date to be confirmed", fee: "AED 5–15", tbc: true,
+    description: "Explore science and technology exhibits in Dubai with your group." },
 ];
 
 
@@ -1631,13 +1657,14 @@ const AI_SECTION = {
    dashboard with the big banners.
    Move a page: move its name up or down the list.
    Hide a page: delete its name, or put // in front of its line.
-   Available names: "home", "timetable", "help", "week", "materials",
+   Available names: "home", "timetable", "schedule", "help", "week", "materials",
    "fees", "activities", "support", "book", "ai".
    Pages from EXTRA_SECTIONS are added after these automatically.
    --------------------------------------------------------------------- */
 const PORTAL_SECTIONS = [
   "home",
   "timetable",
+  "schedule",
   "help",
   "week",
   "materials",
@@ -1661,6 +1688,7 @@ const PORTAL_SECTIONS = [
    Add, remove or reorder banners by adding, removing or moving lines.
    --------------------------------------------------------------------- */
 const HOME_BANNERS = [
+  { page: "schedule",   photo: "built-in:lecture-hall", kicker: "Timetable",    title: "Your whole summer on one page", text: "All four courses, every class time, the competitions and the trips.", button: "Open the full timetable" },
   { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "See what summer school costs, what each fee covers and how to pay.", button: "View fees" },
   { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Clubs, trips and events outside class. Every activity is optional.", button: "See activities" },
   { page: "support",    photo: "built-in:lecture-hall", kicker: "Support",      title: "You are never on your own",  text: "Who to contact, and quick answers to common questions.", button: "Get support" },
@@ -1725,6 +1753,8 @@ const ASSISTANT_KNOWLEDGE = {
       "Ask students to explain each step in words; mistakes usually appear where the words stop.",
     ],
     programming: [
+      "Run AutoCAD and Rhino tutorials as follow-along demos: show one step, pause, and let everyone copy it before moving on.",
+      "Give a simple object (a table, a bracket) and ask pairs to draw it in AutoCAD, then compare drawings.",
       "Live-code with deliberate bugs and let the class find them before you run the program.",
       "Pair programming: one types, one explains, and they swap every 10 minutes.",
       "Give a working program and ask students to predict what one small change will do before running it.",
@@ -1735,11 +1765,14 @@ const ASSISTANT_KNOWLEDGE = {
       "Show a misleading graph or headline and ask what is missing.",
     ],
     teamwork: [
+      "Put students into random teams for the spaghetti bridge and cardboard chair competitions, so they work with new people.",
+      "Before building, give teams 10 minutes to plan on paper and agree who does what.",
       "Give every team member a role (lead, timekeeper, checker, presenter) and rotate the roles each task.",
       "End group work with a two-minute reflection: what went well, and what would you change?",
       "Set a shared goal with individual parts, so every student has something they must deliver.",
     ],
     time: [
+      "Invite current students and a professor to share how they plan their week, then let the class ask questions.",
       "Break the next assignment into three dated checkpoints and check them in class.",
       "Ask students to plan their week in five minutes at the start of the first class of the week.",
       "Show how long tasks really take: students estimate first, then time it and compare.",
@@ -1762,6 +1795,8 @@ const ASSISTANT_KNOWLEDGE = {
       "Estimate 19 × 21 in your head, then work it out exactly.",
     ],
     programming: [
+      "Which engineering software have you used before, if any? What did you make with it?",
+      "Name two things you could design in AutoCAD or Rhino.",
       "What does this print: for i in range(3): print(i * 2)",
       "Name one way to find a bug without running the program.",
       "Write the steps for making tea as a program with one loop and one condition.",
@@ -1950,7 +1985,8 @@ const TEXT = {
   picker: {
     title: "Choose your class times",
     editTitle: "Change your class times",
-    intro: "Classes run on {days}, between {start} and {end}. Each course has one professor who teaches it at three different times of day. You choose the time that suits you.",
+    intro: "Classes run on {days}, between {start} and {end}. Each course meets twice a week. Its professor teaches it at three different times of day: you choose the time that suits you and keep it on both days.",
+    twiceWeekly: "Twice a week: {days}, same time on both days",
     sampleNote: "Courses, professors and rooms are samples for now. They will be confirmed before summer school starts.",
     daysTbcNote: "The class days are provisional and may change.",
     step1Title: "1. When would you like to start on each class day?",
@@ -1986,6 +2022,7 @@ const TEXT = {
     sections: {
       home:       { menu: "Home",                  title: "Home",                        summary: "Your dashboard: next classes, this week and quick links." },
       timetable:  { menu: "My timetable",          title: "My timetable",                summary: "Your weekly classes, with times, professors and rooms." },
+      schedule:   { menu: "Full timetable",        title: "Full summer school timetable", summary: "All four courses, every class time, the competitions and the trips." },
       help:       { menu: "How to use this site",  title: "How to use this website",     summary: "A walkthrough video, a PDF guide and this list." },
       week:       { menu: "This week",             title: "This week",                   summary: "Your assignment, optional extra class, multisport, reminders and attendance." },
       materials:  { menu: "Materials",             title: "Materials for the {level} group", summary: "Slides, readings and worksheets for your group." },
@@ -2073,6 +2110,20 @@ const TEXT = {
     },
     activities: {
       intro: "Meet people and take a break from study. Every activity is optional.",
+    },
+    schedule: {
+      intro: "Everything that happens at summer school, in one place. Your group has {count} courses and each one meets twice a week.",
+      coursesTitle: "Your courses",
+      twiceWeekly: "Twice a week: {days}",
+      weekTitle: "Weekly class times",
+      weekIntro: "Each course runs at three times of day. You pick one when you choose your timetable and keep the same time on both days.",
+      yourTime: "Your time: {time}",
+      options: "Class times: {times}",
+      activitiesTitle: "Activities and competitions",
+      tripsTitle: "Trips",
+      tripsIntro: "Trips are optional. Each one has a small fee of AED 5–15, paid only if you go.",
+      tripFee: "Fee: {fee}",
+      myTimetableButton: "Open my timetable",
     },
     support: {
       intro: "You are never on your own here. If anything feels confusing or stressful, reach out.",
@@ -2421,6 +2472,9 @@ function joinWords(words) {
 function findById(list, id) { return list.find(function (item) { return item.id === id; }) || null; }
 function safeId(text) { return String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
 function dayName(day) { return TIMETABLE.classDays[Number(day) - 1] || String(day); }
+// A course meets on day, and again on day2 if it has one (same time).
+function courseDays(course) { return [Number(course.day)].concat(course.day2 ? [Number(course.day2)] : []); }
+function courseDaysText(course) { return joinWords(courseDays(course).map(dayName)); }
 function prefersReducedMotion() { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
 function sortedLevels() { return LEVELS.slice().sort(function (a, b) { return a.minAverage - b.minAverage; }); }
 function includesLevel(entry, levelId) { return Array.isArray(entry.levels) && entry.levels.indexOf(levelId) !== -1; }
@@ -3365,7 +3419,7 @@ function attCard(course) {
   const list = shown ? (att.lists[shown.id] || []) : [];
   return h("article", { class: "mini-card", id: "att-card-" + course.id },
     h("h3", {}, course.name),
-    h("p", { class: "small muted" }, fill(words.courseLine, { level: levelById(course.level).name, day: dayName(course.day) })),
+    h("p", { class: "small muted" }, fill(words.courseLine, { level: levelById(course.level).name, day: courseDaysText(course) })),
     live ? h("div", {},
       h("div", { id: "att-qr-" + course.id, role: "img", "aria-label": fill(words.qrLabel, { course: course.name }),
         style: "width:min(280px,100%);aspect-ratio:1;margin:12px auto 4px;background:#fff;border-radius:12px;padding:6px;box-sizing:border-box" }),
@@ -3462,6 +3516,7 @@ function checkConfig() {
     if (levelIds.indexOf(c.level) === -1) warn("Course \"" + label + "\" has level \"" + c.level + "\", which is not in LEVELS.");
     if (!findById(PROFESSORS, c.professor)) warn("Course \"" + label + "\" has professor \"" + c.professor + "\", which is not in PROFESSORS.");
     checkDay("Course", label, c.day);
+    if (c.day2) checkDay("Course", label, c.day2);
     if (!Array.isArray(c.times) || c.times.length === 0) { warn("Course \"" + label + "\" has no times."); return; }
     if (c.times.length !== 3) warn("Course \"" + label + "\" has " + c.times.length + " time options. The plan is three per course.");
     checkWindow("Course", label, c.times, classLength(c));
@@ -3602,6 +3657,8 @@ function usableCourses(list) {
 }
 function coursesForLevel(levelId) { return usableCourses(COURSES.filter(function (c) { return c.level === levelId; })); }
 function coursesOnDay(levelId, day) { return coursesForLevel(levelId).filter(function (c) { return Number(c.day) === day; }); }
+// Every course that meets on a day, including its second class of the week.
+function coursesMeetingOnDay(levelId, day) { return coursesForLevel(levelId).filter(function (c) { return courseDays(c).indexOf(day) !== -1; }); }
 function slotFor(course, optionIndex) {
   const start = toMinutes(course.times[optionIndex]);
   return { start: start, end: start + classLength(course) };
@@ -3674,7 +3731,7 @@ function findClashes(levelId, picks) {
 function confirmedPicks(levelId) { return completePicks(levelId, state.timetable.picks, state.timetable.prefs); }
 // The confirmed classes on one day, sorted by start time.
 function classesOnDay(levelId, day, picks) {
-  return coursesOnDay(levelId, day)
+  return coursesMeetingOnDay(levelId, day)
     .map(function (course) { return { course: course, slot: slotFor(course, picks[course.id]) }; })
     .sort(function (a, b) { return a.slot.start - b.slot.start; });
 }
@@ -4745,7 +4802,14 @@ function screenPicker(result) {
   const level = result.level;
   const editing = !!state.timetable;
   const draft = state.draft;
-  const days = TIMETABLE.classDays.map(function (label, i) { return { day: i + 1, label: label }; });
+  // One choice per pair of days: a course keeps the same time on both of its days.
+  const days = TIMETABLE.classDays.map(function (label, i) { return { day: i + 1, label: label }; })
+    .filter(function (d) { return coursesOnDay(level.id, d.day).length > 0; })
+    .map(function (d) {
+      const all = [];
+      coursesOnDay(level.id, d.day).forEach(function (c) { courseDays(c).forEach(function (x) { if (all.indexOf(x) === -1) all.push(x); }); });
+      return { day: d.day, label: joinWords(all.sort(function (a, b) { return a - b; }).map(dayName)) };
+    });
   days.forEach(function (d) { if (!isTime(draft.prefs[d.day])) draft.prefs[d.day] = TIMETABLE.defaultPreferredStart; });
 
   const showOptions = draft.stage === "options";
@@ -4805,6 +4869,7 @@ function pickerDay(d, level, picks, recommended, clashes, preferred) {
       return h("fieldset", { class: "course-card" + (clashList.length ? " has-clash" : ""), id: "course-" + safeId(course.id) },
         h("legend", { class: "course-legend" }, course.name),
         h("p", { class: "course-meta" }, professorLine(course), " · ", course.room || TIMETABLE.defaultRoom),
+        course.day2 ? h("p", { class: "course-meta" }, fill(TEXT.picker.twiceWeekly, { days: courseDaysText(course) })) : null,
         h("div", { class: "time-options" }, course.times.map(function (t, i) {
           const slot = slotFor(course, i);
           const inputId = name + "-" + i;
@@ -4883,7 +4948,7 @@ function cancelEditing() {
 /* ---------- 8. Portal ---------- */
 function portalSections(level) {
   const builders = {
-    home: sectionHome, timetable: sectionTimetable, help: sectionHelp, week: sectionWeek, materials: sectionMaterials,
+    home: sectionHome, timetable: sectionTimetable, schedule: sectionSchedule, help: sectionHelp, week: sectionWeek, materials: sectionMaterials,
     fees: sectionFees, activities: sectionActivities, support: sectionSupport, book: sectionBook, ai: sectionAi,
   };
   const values = { level: level.name };
@@ -5242,18 +5307,78 @@ function sectionFees(sec, ctx) {
 }
 
 // Student activities banner
+function activityItem(a) {
+  return h("li", {},
+    h("strong", {}, a.title),
+    h("p", { class: "small muted" }, a.when, a.tbc ? [" ", tbcBadge()] : null),
+    h("p", {}, a.description)
+  );
+}
+function tripItem(trip) {
+  return h("li", {},
+    h("strong", {}, trip.title),
+    h("p", { class: "small muted" }, trip.when + " · " + fill(TEXT.portal.schedule.tripFee, { fee: trip.fee }), trip.tbc ? [" ", tbcBadge()] : null),
+    h("p", {}, trip.description)
+  );
+}
 function sectionActivities(sec) {
   return sectionWrap(sec, null,
     h("div", { class: "banner banner-activities" },
       h("p", {}, TEXT.portal.activities.intro),
-      h("ul", { class: "activity-list" }, ACTIVITIES.map(function (a) {
-        return h("li", {},
-          h("strong", {}, a.title),
-          h("p", { class: "small muted" }, a.when, a.tbc ? [" ", tbcBadge()] : null),
-          h("p", {}, a.description)
-        );
-      }))
+      h("ul", { class: "activity-list" }, ACTIVITIES.map(activityItem)),
+      TRIPS.length ? [
+        h("h2", { style: "margin-top:24px" }, TEXT.portal.schedule.tripsTitle),
+        h("p", { class: "small muted" }, TEXT.portal.schedule.tripsIntro),
+        h("ul", { class: "activity-list" }, TRIPS.map(tripItem)),
+      ] : null
     )
+  );
+}
+
+// Full timetable: every course, class time, activity and trip on one page.
+function sectionSchedule(sec, ctx) {
+  const words = TEXT.portal.schedule;
+  const levelId = ctx.level.id;
+  const picks = confirmedPicks(levelId);
+  const courses = coursesForLevel(levelId);
+  function linkedActivities(course) {
+    const kind = String(course.id).split("-").pop();
+    return ACTIVITIES.filter(function (a) { return a.course === kind; });
+  }
+  return sectionWrap(sec, null,
+    h("p", { class: "lead" }, fill(words.intro, { count: courses.length })),
+    h("h2", {}, words.coursesTitle),
+    h("div", { class: "card-grid" }, courses.map(function (c) {
+      return h("article", { class: "mini-card" },
+        h("h3", { class: "mini-title" }, c.name),
+        h("p", { class: "small muted" }, fill(words.twiceWeekly, { days: courseDaysText(c) }), " · ", professorLine(c)),
+        c.description ? h("p", {}, c.description) : null,
+        linkedActivities(c).map(function (a) { return h("p", { class: "small" }, h("strong", {}, a.title), ": " + a.when); })
+      );
+    })),
+    h("h2", { style: "margin-top:28px" }, words.weekTitle),
+    h("p", { class: "muted" }, words.weekIntro, TIMETABLE.classDaysTbc ? " " + TEXT.portal.timetable.daysTbc : ""),
+    h("div", { class: "week-grid" }, TIMETABLE.classDays.map(function (dayLabel, i) {
+      const list = coursesMeetingOnDay(levelId, i + 1);
+      return h("div", { class: "day-col" },
+        h("h3", {}, dayLabel),
+        list.length ? h("ul", { class: "plain-list" }, list.map(function (c) {
+          const mine = Number.isInteger(picks[c.id]) ? slotFor(c, picks[c.id]) : null;
+          return h("li", { class: "class-block" },
+            h("p", { class: "class-name" }, c.name),
+            mine ? h("p", { class: "class-time" }, fill(words.yourTime, { time: timeRange(mine.start, mine.end) })) : null,
+            h("p", { class: "class-meta" }, fill(words.options, { times: c.times.map(function (t, k) { const slot = slotFor(c, k); return timeRange(slot.start, slot.end); }).join(", ") })),
+            h("p", { class: "class-meta" }, c.room || TIMETABLE.defaultRoom)
+          );
+        })) : h("p", { class: "muted small", style: "margin:8px 0 0" }, TEXT.portal.timetable.noClasses)
+      );
+    })),
+    h("h2", { style: "margin-top:28px" }, words.activitiesTitle),
+    h("ul", { class: "activity-list" }, ACTIVITIES.map(activityItem)),
+    h("h2", { style: "margin-top:28px" }, words.tripsTitle),
+    h("p", { class: "muted" }, words.tripsIntro),
+    h("ul", { class: "activity-list" }, TRIPS.map(tripItem)),
+    h("div", { class: "actions actions-start" }, h("a", { class: "btn btn-secondary", href: "#timetable" }, words.myTimetableButton))
   );
 }
 
@@ -5446,7 +5571,7 @@ function screenStaff(sections, page) {
       h("h1", { id: "screen-heading", tabindex: "-1" }, fill(TEXT.staff.title, { name: prof.name })),
       h("p", { class: "lead", style: "margin:0" }, TEXT.staff.intro),
       courses.length ? h("ul", { class: "chip-row" }, courses.map(function (c) {
-        return h("li", { class: "chip" }, fill(TEXT.staff.courseLine, { course: c.name, level: levelById(c.level).name, day: dayName(c.day) }));
+        return h("li", { class: "chip" }, fill(TEXT.staff.courseLine, { course: c.name, level: levelById(c.level).name, day: courseDaysText(c) }));
       })) : null
     ),
     h("p", { class: "notice notice-info", style: "margin-top:20px" }, online.on ? TEXT.staff.onlineNote : TEXT.staff.demoNote),
@@ -6027,7 +6152,7 @@ function assistantReplyBasic(text, prof) {
     const lines = published.map(function (a) { return fill(words.emailAssignmentLine, { title: a.title, due: a.due }); })
       .concat(exams.map(function (e) { return fill(words.emailExamLine, { title: e.title, when: e.when }); }));
     return { kind: "draft", text: fill(words.emailDraft, {
-      course: course ? course.name : "", level: levelName, day: course ? dayName(course.day) : "",
+      course: course ? course.name : "", level: levelName, day: course ? courseDaysText(course) : "",
       lines: lines.length ? lines.join("\n") : words.emailNothingDue, name: prof.name }) };
   }
   if (/(support|struggl|help|risk|behind|need|weak)/.test(lower)) {
@@ -6293,7 +6418,7 @@ const ASSISTANT_INTENTS = [
         if (!course) return { text: "None of your classes starts at " + wanted + ". Ask “which times did students choose?” to see your class times." };
         const index = course.times.indexOf(wanted);
         const names = Object.keys(db.students).filter(function (email) { return aPicks(email)[course.id] === index; }).map(nameFromEmail);
-        return { text: course.name + ", " + dayName(course.day) + " at " + aSlotText(course, index) + ": " + names.length + " student" + (names.length === 1 ? "" : "s") + (names.length ? "\n\n" + aList(names) : ".") };
+        return { text: course.name + ", " + courseDaysText(course) + " at " + aSlotText(course, index) + ": " + names.length + " student" + (names.length === 1 ? "" : "s") + (names.length ? "\n\n" + aList(names) : ".") };
       }
       if (!ctx.mine.length) return { text: TEXT.staff.assistant.noStudents };
       return { text: "Students in your " + ctx.groupName + " group (" + ctx.mine.length + "):\n\n" + aList(ctx.mine.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).map(function (r) {
@@ -6330,13 +6455,13 @@ const ASSISTANT_INTENTS = [
     answer: function (t, ctx) {
       if (!ctx.courses.length) return { text: "You have no courses on the timetable yet." };
       return { text: ctx.courses.map(function (c) {
-        return c.name + " (" + levelById(c.level).name + " group): " + dayName(c.day) + ", " + (c.room || TIMETABLE.defaultRoom) + "\n" +
+        return c.name + " (" + levelById(c.level).name + " group): " + courseDaysText(c) + ", " + (c.room || TIMETABLE.defaultRoom) + "\n" +
           aList(c.times.map(function (time, i) { const n = aPickedCount(c, i); return aSlotText(c, i) + ": " + n + " student" + (n === 1 ? "" : "s") + " chose this time"; }));
       }).join("\n\n") + (TIMETABLE.classDaysTbc ? "\n\nThe class days are still provisional." : "") };
     } },
   { id: "mycourses", test: function (t) { return aHas(t, ["my course", "what do i teach", "which course", "my group", "which group", "what group", "my subject", "my classes", "my modules"]); },
     answer: function (t, ctx) {
-      return { text: ctx.courses.length ? "You teach:\n\n" + aList(ctx.courses.map(function (c) { return c.name + " · " + levelById(c.level).name + " group · " + dayName(c.day); })) : "You have no courses on the timetable yet." };
+      return { text: ctx.courses.length ? "You teach:\n\n" + aList(ctx.courses.map(function (c) { return c.name + " · " + levelById(c.level).name + " group · " + courseDaysText(c); })) : "You have no courses on the timetable yet." };
     } },
   { id: "survey", test: function (t) { return aHas(t, ["survey", "placement", "how are groups", "how were groups", "groups decided", "levels decided", "threshold", "scale", "how groups", "how do groups"]); },
     answer: function (t, ctx) {
@@ -6346,7 +6471,8 @@ const ASSISTANT_INTENTS = [
         aThresholds() + "." };
     } },
   { id: "activities", test: function (t) { return aHas(t, ["activities", "club", "trip", "event", "social", "hackathon", "tour", "extracurricular", "welcome evening"]) && !aHas(t, ["activities for", "recent", "latest"]); },
-    answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) }; } },
+    answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
+      (TRIPS.length ? "\n\nTrips (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
   { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much"]); },
     answer: function () { return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) }; } },
   { id: "dates", test: function (t) { return aHas(t, ["what week", "which week", "week is it", "start date", "programme start", "program start", "when did", "when does summer", "class days", "which days"]); },
@@ -6386,7 +6512,7 @@ function aStudentAnswer(t, ctx) {
     lines.push("Skills, weakest first:\n" + aList(skills.map(function (s) { return s.skill.name + ": " + aNum(s.average); })));
     const picks = aPicks(r.email);
     const mineTimes = ctx.courses.filter(function (c) { return typeof picks[c.id] === "number"; })
-      .map(function (c) { return c.name + ": " + dayName(c.day) + ", " + aSlotText(c, picks[c.id]); });
+      .map(function (c) { return c.name + ": " + courseDaysText(c) + ", " + aSlotText(c, picks[c.id]); });
     lines.push(r.timetableConfirmed ? (mineTimes.length ? "Your class with them:\n" + aList(mineTimes) : "Timetable confirmed.") : "Timetable not confirmed yet.");
     const weakest = r.weakest[0];
     const workshop = weakest ? workshopFor(weakest.skill.id, r.level.id) : null;
@@ -6444,8 +6570,8 @@ function aNextClassAnswer(t, ctx) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   let best = null;
-  ctx.courses.forEach(function (c) {
-    const weekday = WEEKDAY_NAMES.indexOf(String(dayName(c.day)).toLowerCase());
+  ctx.courses.forEach(function (c) { courseDays(c).forEach(function (dayNumber) {
+    const weekday = WEEKDAY_NAMES.indexOf(String(dayName(dayNumber)).toLowerCase());
     if (weekday === -1) return;
     for (let offset = 0; offset < 8; offset++) {
       const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
@@ -6457,7 +6583,7 @@ function aNextClassAnswer(t, ctx) {
       if (!best || when < best.when) best = { when: when, course: c, date: date, option: options[0], offset: offset };
       break;
     }
-  });
+  }); });
   if (!best) return { text: "I couldn't work out your next class from the timetable." };
   const n = aPickedCount(best.course, best.option.i);
   const dayText = best.offset === 0 ? "today" : (best.offset === 1 ? "tomorrow" : aDateText(best.date));
