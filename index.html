@@ -3957,7 +3957,7 @@ function siteFooter() {
       h("div", { class: "footer-actions" },
         h("button", { type: "button", class: "btn btn-quiet", onClick: openCookieSettings }, TEXT.cookieSettingsButton),
         isStudent()
-          ? h("button", { type: "button", class: "btn btn-quiet", onClick: startAgain }, TEXT.startAgainButton)
+          ? null
           : (online.on || webMode ? null : h("button", { type: "button", class: "btn btn-quiet", onClick: resetDevice }, TEXT.resetDeviceButton)))
     )
   );
