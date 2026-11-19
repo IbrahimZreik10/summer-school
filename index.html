@@ -1284,6 +1284,21 @@ const COURSES = [
 
 
 /* ---------------------------------------------------------------------
+   COURSE_DETAILS: the credits and price of each course. The name on the
+   left is the end of the course id in COURSES ("fnd-ai" -> "ai"), so one
+   line covers that course in every group.
+   credits: credit points the course is worth.
+   fee:     type it exactly as it should appear, e.g. "AED 500".
+   --------------------------------------------------------------------- */
+const COURSE_DETAILS = {
+  ai:          { credits: 5, fee: "AED 500" },
+  teamwork:    { credits: 5, fee: "AED 500" },
+  programming: { credits: 5, fee: "AED 500" },
+  time:        { credits: 5, fee: "AED 500" },
+};
+
+
+/* ---------------------------------------------------------------------
    WORKSHOPS: optional extra classes. Each student sees ONE in "This week",
    matched to their weakest skill and their group.
    skill:   the skill id from SURVEY_SKILLS this workshop helps with.
@@ -1520,7 +1535,7 @@ const MATERIALS = [
    Add: copy a line. Remove: delete a line.
    --------------------------------------------------------------------- */
 const FEES = [
-  { item: "Summer school tuition", amount: "AED 2,000", tbc: false, note: "Per student. Covers all classes and workshops." },
+  { item: "Summer school tuition", amount: "AED 2,000", tbc: false, note: "Per student. Covers all four courses (AED 500 each, 20 credits in total) and the workshops." },
   { item: "Learning materials and software", amount: "Included", tbc: false, note: "Provided by the university at no extra cost." },
   { item: "Activities and trip (optional)", amount: "AED 5–15", tbc: false, note: "A small fee for the trip, only if you join it." },
 ];
@@ -2102,7 +2117,15 @@ const TEXT = {
       payText: "Payment details and deadlines will be sent to your university email by the summer school office.",
       helpTitle: "Questions about fees?",
       helpButton: "Open Support and Q&A",
-      intro: "Fee amounts are still being finalised. This page will show the final amounts once they are confirmed.",
+      intro: "What summer school costs, what each fee covers, and the credits each course is worth.",
+      courseTitle: "Tuition by course",
+      courseIntro: "Your tuition covers four courses. Each course runs twice a week for the whole summer school.",
+      courseHeader: "Course",
+      daysHeader: "Days",
+      creditsHeader: "Credits",
+      feeHeader: "Fee",
+      totalLabel: "Total",
+      creditsValue: "{credits} credits",
       itemHeader: "What it covers",
       amountHeader: "Amount",
       contact: "Questions about fees? Contact the summer school office (see Support and Q&A).",
@@ -2114,6 +2137,7 @@ const TEXT = {
       intro: "Everything that happens at summer school, in one place. Your group has {count} courses and each one meets twice a week.",
       coursesTitle: "Your courses",
       twiceWeekly: "Twice a week: {days}",
+      courseDetails: "{credits} credits · {fee}",
       weekTitle: "Weekly class times",
       weekIntro: "Each course runs at three times of day. You pick one when you choose your timetable and keep the same time on both days.",
       yourTime: "Your time: {time}",
@@ -2474,6 +2498,8 @@ function dayName(day) { return TIMETABLE.classDays[Number(day) - 1] || String(da
 // A course meets on day, and again on day2 if it has one (same time).
 function courseDays(course) { return [Number(course.day)].concat(course.day2 ? [Number(course.day2)] : []); }
 function courseDaysText(course) { return joinWords(courseDays(course).map(dayName)); }
+// Credits and price of a course, from COURSE_DETAILS.
+function courseDetails(course) { return COURSE_DETAILS[String(course.id).split("-").pop()] || null; }
 function prefersReducedMotion() { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); }
 function sortedLevels() { return LEVELS.slice().sort(function (a, b) { return a.minAverage - b.minAverage; }); }
 function includesLevel(entry, levelId) { return Array.isArray(entry.levels) && entry.levels.indexOf(levelId) !== -1; }
@@ -5297,10 +5323,39 @@ function sectionFees(sec, ctx) {
         fee.note ? h("p", { class: "fee-note" }, fee.note) : null
       );
     })),
+    courseFeeTable(ctx && ctx.level ? coursesForLevel(ctx.level.id) : [], words),
     h("div", { class: "card-grid", style: "margin-top:16px" },
       h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.payTitle), h("p", {}, words.payText)),
       h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.helpTitle), h("p", {}, words.contact),
         hasSupport ? h("div", { class: "card-actions" }, h("a", { class: "btn btn-secondary btn-small", href: "#support" }, words.helpButton)) : null)
+    )
+  );
+}
+
+// Tuition by course: credits and price of each course, with the total.
+function courseFeeTable(courses, words) {
+  const rows = courses.filter(function (c) { return courseDetails(c); });
+  if (!rows.length) return null;
+  const totalCredits = rows.reduce(function (n, c) { return n + (Number(courseDetails(c).credits) || 0); }, 0);
+  const total = FEES.length ? FEES[0].amount : "";
+  return h("div", { style: "margin-top:24px" },
+    h("h2", {}, words.courseTitle),
+    h("p", { class: "muted" }, words.courseIntro),
+    h("div", { class: "table-wrap" },
+      h("table", { class: "fee-table" },
+        h("thead", {}, h("tr", {},
+          h("th", { scope: "col" }, words.courseHeader), h("th", { scope: "col" }, words.daysHeader),
+          h("th", { scope: "col" }, words.creditsHeader), h("th", { scope: "col" }, words.feeHeader))),
+        h("tbody", {},
+          rows.map(function (c) {
+            const d = courseDetails(c);
+            return h("tr", {}, h("td", {}, c.name), h("td", {}, courseDaysText(c)),
+              h("td", {}, fill(words.creditsValue, { credits: d.credits })), h("td", { class: "fee-amount" }, d.fee));
+          }),
+          h("tr", {}, h("td", {}, h("strong", {}, words.totalLabel)), h("td", {}, ""),
+            h("td", {}, h("strong", {}, fill(words.creditsValue, { credits: totalCredits }))), h("td", { class: "fee-amount" }, total))
+        )
+      )
     )
   );
 }
@@ -5351,6 +5406,7 @@ function sectionSchedule(sec, ctx) {
       return h("article", { class: "mini-card" },
         h("h3", { class: "mini-title" }, c.name),
         h("p", { class: "small muted" }, fill(words.twiceWeekly, { days: courseDaysText(c) }), " · ", professorLine(c)),
+        courseDetails(c) ? h("p", { class: "small" }, h("strong", {}, fill(words.courseDetails, courseDetails(c)))) : null,
         c.description ? h("p", {}, c.description) : null,
         linkedActivities(c).map(function (a) { return h("p", { class: "small" }, h("strong", {}, a.title), ": " + a.when); })
       );
@@ -6473,7 +6529,12 @@ const ASSISTANT_INTENTS = [
     answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
       (TRIPS.length ? "\n\nTrip (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
   { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much"]); },
-    answer: function () { return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) }; } },
+    answer: function (t, ctx) {
+      const kinds = [];
+      COURSES.forEach(function (c) { const k = String(c.id).split("-").pop(); if (COURSE_DETAILS[k] && !kinds.some(function (x) { return x.k === k; })) kinds.push({ k: k, name: c.name }); });
+      return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) +
+        (kinds.length ? "\n\nTuition by course:\n" + aList(kinds.map(function (x) { return x.name + ": " + COURSE_DETAILS[x.k].credits + " credits, " + COURSE_DETAILS[x.k].fee; })) : "") };
+    } },
   { id: "dates", test: function (t) { return aHas(t, ["what week", "which week", "week is it", "start date", "programme start", "program start", "when did", "when does summer", "class days", "which days"]); },
     answer: function () {
       const start = new Date(SITE.programmeStartDate + "T00:00:00");
