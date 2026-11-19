@@ -1522,7 +1522,7 @@ const MATERIALS = [
 const FEES = [
   { item: "Summer school tuition", amount: "AED 2,000", tbc: false, note: "Per student. Covers all classes and workshops." },
   { item: "Learning materials and software", amount: "Included", tbc: false, note: "Provided by the university at no extra cost." },
-  { item: "Activities and trips (optional)", amount: "AED 5–15", tbc: false, note: "A small fee per trip, only if you join it." },
+  { item: "Activities and trip (optional)", amount: "AED 5–15", tbc: false, note: "A small fee for the trip, only if you join it." },
 ];
 
 
@@ -1544,17 +1544,14 @@ const ACTIVITIES = [
 
 
 /* ---------------------------------------------------------------------
-   TRIPS: shown under the Full timetable and on the Activities page.
+   TRIPS: the summer school trip, shown under the Full timetable and on
+   the Activities page.
    fee: type it exactly as it should appear, e.g. "AED 10".
    tbc: true shows a "To be confirmed" label. Add or remove a line.
    --------------------------------------------------------------------- */
 const TRIPS = [
-  { title: "Campus and city tour", when: "Week 2, Saturday morning", fee: "AED 5–15", tbc: true,
-    description: "Find your way around campus and see some of Dubai." },
-  { title: "Engineering site visit", when: "Week 3, date to be confirmed", fee: "AED 5–15", tbc: true,
-    description: "Visit a real engineering or construction site and see how a project is run." },
-  { title: "Science and technology day out", when: "Week 4, date to be confirmed", fee: "AED 5–15", tbc: true,
-    description: "Explore science and technology exhibits in Dubai with your group." },
+  { title: "Summer school trip", when: "Week 3, date to be confirmed", fee: "AED 5–15", tbc: true,
+    description: "One day out with your group. The destination will be announced soon." },
 ];
 
 
@@ -1688,9 +1685,9 @@ const PORTAL_SECTIONS = [
    Add, remove or reorder banners by adding, removing or moving lines.
    --------------------------------------------------------------------- */
 const HOME_BANNERS = [
-  { page: "schedule",   photo: "built-in:lecture-hall", kicker: "Timetable",    title: "Your whole summer on one page", text: "All four courses, every class time, the competitions and the trips.", button: "Open the full timetable" },
+  { page: "schedule",   photo: "built-in:lecture-hall", kicker: "Timetable",    title: "Your whole summer on one page", text: "All four courses, every class time, the competitions and the trip.", button: "Open the full timetable" },
   { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "See what summer school costs, what each fee covers and how to pay.", button: "View fees" },
-  { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Clubs, trips and events outside class. Every activity is optional.", button: "See activities" },
+  { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Clubs, a trip and events outside class. Every activity is optional.", button: "See activities" },
   { page: "support",    photo: "built-in:lecture-hall", kicker: "Support",      title: "You are never on your own",  text: "Who to contact, and quick answers to common questions.", button: "Get support" },
   { page: "materials",  photo: "built-in:computer-lab", kicker: "Materials",    title: "Everything for your group",  text: "A guide to your group's slides, worksheets and readings, with links to Canvas.", button: "Open materials" },
 ];
@@ -2022,12 +2019,12 @@ const TEXT = {
     sections: {
       home:       { menu: "Home",                  title: "Home",                        summary: "Your dashboard: next classes, this week and quick links." },
       timetable:  { menu: "My timetable",          title: "My timetable",                summary: "Your weekly classes, with times, professors and rooms." },
-      schedule:   { menu: "Full timetable",        title: "Full summer school timetable", summary: "All four courses, every class time, the competitions and the trips." },
+      schedule:   { menu: "Full timetable",        title: "Full summer school timetable", summary: "All four courses, every class time, the competitions and the trip." },
       help:       { menu: "How to use this site",  title: "How to use this website",     summary: "A walkthrough video, a PDF guide and this list." },
       week:       { menu: "This week",             title: "This week",                   summary: "Your assignment, optional extra class, multisport, reminders and attendance." },
       materials:  { menu: "Materials",             title: "Materials for the {level} group", summary: "Slides, readings and worksheets for your group." },
       fees:       { menu: "Fees",                  title: "Fees and payments",           summary: "What summer school costs and how to pay." },
-      activities: { menu: "Activities",            title: "Student activities",          summary: "Clubs, trips and events outside class." },
+      activities: { menu: "Activities",            title: "Student activities",          summary: "Clubs, a trip and events outside class." },
       support:    { menu: "Support and Q&A",       title: "Support and questions",       summary: "Who to contact, and answers to common questions." },
       book:       { menu: "Book of the week",      title: "Book of the week",            summary: "A recommended read that changes every week." },
       ai:         { menu: "How this portal runs",  title: "How this portal runs",        summary: "How AI agents help run the portal fairly." },
@@ -2120,8 +2117,8 @@ const TEXT = {
       yourTime: "Your time: {time}",
       options: "Class times: {times}",
       activitiesTitle: "Activities and competitions",
-      tripsTitle: "Trips",
-      tripsIntro: "Trips are optional. Each one has a small fee of AED 5–15, paid only if you go.",
+      tripsTitle: "Trip",
+      tripsIntro: "The trip is optional and has a small fee of AED 5–15, paid only if you go.",
       tripFee: "Fee: {fee}",
       myTimetableButton: "Open my timetable",
     },
@@ -5335,7 +5332,7 @@ function sectionActivities(sec) {
   );
 }
 
-// Full timetable: every course, class time, activity and trip on one page.
+// Full timetable: every course, class time, activity and the trip on one page.
 function sectionSchedule(sec, ctx) {
   const words = TEXT.portal.schedule;
   const levelId = ctx.level.id;
@@ -6472,7 +6469,7 @@ const ASSISTANT_INTENTS = [
     } },
   { id: "activities", test: function (t) { return aHas(t, ["activities", "club", "trip", "event", "social", "hackathon", "tour", "extracurricular", "welcome evening"]) && !aHas(t, ["activities for", "recent", "latest"]); },
     answer: function () { return { text: "Student activities:\n\n" + aList(ACTIVITIES.map(function (a) { return a.title + ": " + a.when + (a.tbc ? " (to be confirmed)" : "") + ". " + a.description; })) +
-      (TRIPS.length ? "\n\nTrips (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
+      (TRIPS.length ? "\n\nTrip (optional, small fee):\n" + aList(TRIPS.map(function (x) { return x.title + ": " + x.when + ", " + x.fee + (x.tbc ? " (to be confirmed)" : ""); })) : "") }; } },
   { id: "fees", test: function (t) { return aHas(t, [" fee", "cost", "price", "tuition", " pay", "how much"]); },
     answer: function () { return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) }; } },
   { id: "dates", test: function (t) { return aHas(t, ["what week", "which week", "week is it", "start date", "programme start", "program start", "when did", "when does summer", "class days", "which days"]); },
