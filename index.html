@@ -1536,6 +1536,9 @@ const MATERIALS = [
    --------------------------------------------------------------------- */
 const FEES = [
   { item: "Summer school tuition", amount: "AED 2,000", tbc: false, note: "Per student. Covers all four courses (AED 500 each, 20 credits in total) and the workshops." },
+  { item: "Registration and admin fee", amount: "AED 100", tbc: false, note: "Operational fee, paid once with Instalment 1. Covers enrolment, your student record and your certificate. Non-refundable." },
+  { item: "Lab and equipment fee", amount: "AED 50", tbc: false, note: "Operational fee, paid once with Instalment 1. Covers computer lab access and the materials for the spaghetti bridge and cardboard chair competitions." },
+  { item: "Student ID and campus access", amount: "AED 25", tbc: false, note: "Operational fee, paid once with Instalment 1. Covers your summer school ID card and campus entry." },
   { item: "Learning materials and software", amount: "Included", tbc: false, note: "Provided by the university at no extra cost." },
   { item: "Activities and trip (optional)", amount: "AED 5–15", tbc: false, note: "A small fee for the trip, only if you join it." },
 ];
@@ -1713,7 +1716,7 @@ const PORTAL_SECTIONS = [
    --------------------------------------------------------------------- */
 const HOME_BANNERS = [
   { page: "schedule",   photo: "built-in:lecture-hall", kicker: "Timetable",    title: "Your whole summer on one page", text: "All four courses, every class time, the competitions and the trip.", button: "Open the full timetable" },
-  { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "See what summer school costs, what each fee covers and how to pay.", button: "View fees" },
+  { page: "fees",       photo: "built-in:campus",       kicker: "Fees",         title: "Fees and payments",          text: "Tuition, operational fees and the instalment plan: what summer school costs and how to pay.", button: "View fees" },
   { page: "activities", photo: "built-in:studying",     kicker: "Student life", title: "Meet people, make friends",  text: "Clubs, a trip and events outside class. Every activity is optional.", button: "See activities" },
   { page: "support",    photo: "built-in:lecture-hall", kicker: "Support",      title: "You are never on your own",  text: "Who to contact, and quick answers to common questions.", button: "Get support" },
   { page: "materials",  photo: "built-in:computer-lab", kicker: "Materials",    title: "Everything for your group",  text: "A guide to your group's slides, worksheets and readings, with links to Canvas.", button: "Open materials" },
@@ -2137,7 +2140,7 @@ const TEXT = {
       totalLabel: "Total",
       creditsValue: "{credits} credits",
       planTitle: "Instalment plan",
-      planIntro: "You can pay the AED 2,000 tuition in two equal instalments instead of all at once. There is no extra charge for paying in instalments.",
+      planIntro: "You can pay the AED 2,000 tuition in two equal instalments instead of all at once. There is no extra charge for paying in instalments. The operational fees (AED 175 in total) are paid once, with Instalment 1.",
       planHeader: "Instalment",
       amountColHeader: "Amount",
       dueHeader: "Due",
