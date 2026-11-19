@@ -44,6 +44,8 @@ jobs:
           open("_site/index.html", "w", encoding="utf-8").write(page)
           PY
           touch _site/.nojekyll
+          # Copy the guide videos, PDFs and photos next to the page
+          if [ -d guides ]; then cp -r guides _site/; fi
 
       - uses: actions/configure-pages@v5
 
