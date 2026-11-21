@@ -1563,13 +1563,13 @@ const PAYMENT_PLAN = [
    --------------------------------------------------------------------- */
 const ACTIVITIES = [
   { title: "Welcome evening", when: "Week 1, Monday after classes", tbc: true, description: "Meet your group, your professors and the summer school team." },
-  { title: "Spaghetti bridge competition", when: "Week 2, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: true,
+  { title: "Spaghetti bridge competition", when: "Week 2, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: false,
     description: "In randomised teams, build a bridge from spaghetti and glue. The bridge that holds the most weight wins." },
-  { title: "Cardboard chair challenge", when: "Week 3, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: true,
+  { title: "Cardboard chair challenge", when: "Week 3, in your Teamwork and Communication classes", course: "teamwork", required: true, tbc: false,
     description: "In new randomised teams, build a chair out of cardboard that is strong enough to sit on." },
-  { title: "AutoCAD workshop", when: "Week 2, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 2", course: "programming", required: true, tbc: true,
+  { title: "AutoCAD workshop", when: "Week 2, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 2", course: "programming", required: true, tbc: false,
     description: "A hands-on session in the computer lab: draw your first plan in AutoCAD with help from a tutor. All students attend together." },
-  { title: "Public speaking workshop", when: "Week 3, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 3", course: "teamwork", required: true, tbc: true,
+  { title: "Public speaking workshop", when: "Week 3, Friday, 10:00 – 12:00", day: "Friday", time: "10:00 – 12:00", week: "Week 3", course: "teamwork", required: true, tbc: false,
     description: "Practise presenting your ideas with confidence, in small groups and in front of the class. All students attend together." },
 ];
 
@@ -1592,8 +1592,9 @@ const TRIPS = [
    --------------------------------------------------------------------- */
 const SUPPORT_CONTACTS = [
   { title: "Summer school office", detail: "For timetable, group and general questions.", contact: "Email and phone to be confirmed", tbc: true },
-  { title: "Student wellbeing", detail: "If you feel stressed, worried or unwell, talk to us in confidence.", contact: "Email and phone to be confirmed", tbc: true },
-  { title: "IT help", detail: "For login, Wi-Fi and software problems.", contact: "Email and phone to be confirmed", tbc: true },
+  { title: "Fees and payments", detail: "For paying your fees, the instalment plan and receipts. This is the Heriot-Watt Dubai finance team.", contact: "finance-services-dubai@hw.ac.uk, +971 4 571 7000 (ext. 4), Monday to Friday, 09:30 to 17:00", tbc: false },
+  { title: "Student wellbeing", detail: "If you feel stressed, worried or unwell, the Heriot-Watt Dubai wellbeing team is there to talk in confidence. It isn't an emergency service: in a crisis, go to your nearest emergency room.", contact: "dubaiwellbeing@hw.ac.uk", tbc: false },
+  { title: "IT help", detail: "For login, Wi-Fi and software problems. This is the Heriot-Watt Dubai IT helpdesk.", contact: "DubaiISHelp@hw.ac.uk, +971 4 571 7000 (ext. 5), Library, Level 2", tbc: false },
 ];
 
 
@@ -1875,12 +1876,12 @@ const TEXT = {
   optionalBadge: "Optional",
   comingSoonBadge: "Coming soon",
   storageWarning: "This browser is not saving your progress, so please finish in one sitting. Everything else works as normal.",
-  footerNote: "Concept site with sample content. Anything marked “To be confirmed” is a placeholder.",
+  footerNote: "Details marked “To be confirmed” will be updated before summer school starts.",
   startAgainButton: "Start again (clears my answers)",
   startAgainConfirm: "This deletes your survey answers, group and timetable. Do you want to start again from the beginning?",
   startAgainYes: "Yes, start again",
   resetDeviceYes: "Yes, delete everything",
-  resetDeviceButton: "Reset demo data on this device",
+  resetDeviceButton: "Clear saved data on this device",
   footerAbout: "Live lectures run between {start} and {end}. Every course offers three professor-approved times, so your week fits your routine.",
   cookieSettingsButton: "Cookie settings",
   live: {
@@ -2023,7 +2024,7 @@ const TEXT = {
     editTitle: "Change your class times",
     intro: "Classes run on {days}, between {start} and {end}. Each course meets twice a week. Its professor teaches it at three different times of day: you choose the time that suits you and keep it on both days.",
     twiceWeekly: "Twice a week: {days}, same time on both days",
-    sampleNote: "Courses, professors and rooms are samples for now. They will be confirmed before summer school starts.",
+    sampleNote: "Professor names and rooms will be confirmed before summer school starts.",
     daysTbcNote: "The class days are provisional and may change.",
     step1Title: "1. When would you like to start on each class day?",
     step1Help: "Pick any time between {start} and {end}. We will recommend the class times closest to it.",
@@ -2155,7 +2156,7 @@ const TEXT = {
       dueHeader: "Due",
       itemHeader: "What it covers",
       amountHeader: "Amount",
-      contact: "Questions about fees? Contact the summer school office (see Support and Q&A).",
+      contact: "Email the Heriot-Watt Dubai finance team at finance-services-dubai@hw.ac.uk or call +971 4 571 7000 (ext. 4), Monday to Friday, 09:30 to 17:00.",
     },
     activities: {
       intro: "Meet people and learn by doing. The competitions and workshops are part of your timetable and every student takes part.",
@@ -4109,7 +4110,7 @@ function accountBar() {
   return h("section", { class: "account-bar" + (ui.loginOpen ? " is-open" : ""), id: "account-bar", "aria-label": words.regionLabel },
     h("div", { class: "account-inner" },
       h("div", { class: "login-summary" },
-        h("p", { class: "login-title" }, h("span", { class: "login-title-wide" }, words.title), h("span", { class: "login-title-narrow" }, words.collapsedText), " ", badge(words.demoBadge, "tbc")),
+        h("p", { class: "login-title" }, h("span", { class: "login-title-wide" }, words.title), h("span", { class: "login-title-narrow" }, words.collapsedText)),
         h("button", { type: "button", class: "btn btn-primary btn-small login-toggle", id: "login-toggle", "aria-expanded": ui.loginOpen ? "true" : "false", "aria-controls": "login-body", onClick: toggleLogin },
           ui.loginOpen ? words.closeButton : words.openButton)
       ),
@@ -4898,7 +4899,7 @@ function screenPicker(result) {
     h("div", { class: "card" },
       h("h1", { id: "screen-heading", tabindex: "-1" }, editing ? TEXT.picker.editTitle : TEXT.picker.title),
       h("p", {}, fill(TEXT.picker.intro, { days: joinWords(TIMETABLE.classDays), start: TIMETABLE.dayStart, end: TIMETABLE.dayEnd })),
-      TEXT.picker.sampleNote ? h("p", { class: "small muted", style: "margin:0" }, badge(TEXT.sampleBadge, "tbc"), " ", TEXT.picker.sampleNote,
+      TEXT.picker.sampleNote ? h("p", { class: "small muted", style: "margin:0" }, tbcBadge(), " ", TEXT.picker.sampleNote,
         TIMETABLE.classDaysTbc ? " " + TEXT.picker.daysTbcNote : "") : null
     ),
     h("section", { class: "card", "aria-labelledby": "pref-title" },
@@ -5374,7 +5375,7 @@ function sectionFees(sec, ctx) {
     paymentPlanTable(words),
     h("div", { class: "card-grid", style: "margin-top:16px" },
       h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.payTitle), h("p", {}, words.payText)),
-      h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.helpTitle), h("p", {}, words.contact),
+      h("article", { class: "mini-card" }, h("h2", { class: "mini-title" }, words.helpTitle), h("p", {}, linkify(words.contact)),
         hasSupport ? h("div", { class: "card-actions" }, h("a", { class: "btn btn-secondary btn-small", href: "#support" }, words.helpButton)) : null)
     )
   );
@@ -5523,6 +5524,14 @@ function sectionSchedule(sec, ctx) {
   );
 }
 
+// Turns email addresses and the campus phone number in a piece of text into links
+function linkify(text) {
+  return String(text).split(/([\w.+-]+@[\w-]+(?:\.[\w-]+)+|\+971 4 571 7000)/).map(function (part, i) {
+    if (i % 2 === 0) return part;
+    return part.indexOf("@") > 0 ? h("a", { href: "mailto:" + part }, part) : h("a", { href: "tel:" + part.replace(/\s/g, "") }, part);
+  });
+}
+
 // Support and Q&A banner
 function sectionSupport(sec) {
   const words = TEXT.portal.support;
@@ -5536,7 +5545,7 @@ function sectionSupport(sec) {
             return h("li", {},
               h("strong", {}, c.title),
               h("p", {}, c.detail),
-              h("p", { class: "small muted" }, c.contact, c.tbc ? [" ", tbcBadge()] : null)
+              h("p", { class: "small muted" }, linkify(c.contact), c.tbc ? [" ", tbcBadge()] : null)
             );
           }))
         ),
@@ -6629,7 +6638,8 @@ const ASSISTANT_INTENTS = [
       COURSES.forEach(function (c) { const k = String(c.id).split("-").pop(); if (COURSE_DETAILS[k] && !kinds.some(function (x) { return x.k === k; })) kinds.push({ k: k, name: c.name }); });
       return { text: "Fees:\n\n" + aList(FEES.map(function (f) { return f.item + ": " + f.amount + (f.tbc ? " (to be confirmed)" : "") + (f.note ? ". " + f.note : ""); })) +
         (kinds.length ? "\n\nTuition by course:\n" + aList(kinds.map(function (x) { return x.name + ": " + COURSE_DETAILS[x.k].credits + " credits, " + COURSE_DETAILS[x.k].fee; })) : "") +
-        (PAYMENT_PLAN.length ? "\n\nInstalment plan:\n" + aList(PAYMENT_PLAN.map(function (p) { return p.label + ": " + p.amount + ", " + p.due.charAt(0).toLowerCase() + p.due.slice(1); })) : "") };
+        (PAYMENT_PLAN.length ? "\n\nInstalment plan:\n" + aList(PAYMENT_PLAN.map(function (p) { return p.label + ": " + p.amount + ", " + p.due.charAt(0).toLowerCase() + p.due.slice(1); })) : "") +
+        "\n\nQuestions about paying? Email finance-services-dubai@hw.ac.uk or call +971 4 571 7000 (ext. 4)." };
     } },
   { id: "dates", test: function (t) { return aHas(t, ["what week", "which week", "week is it", "start date", "programme start", "program start", "when did", "when does summer", "class days", "which days"]); },
     answer: function () {
