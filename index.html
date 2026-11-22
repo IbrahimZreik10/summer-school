@@ -1591,7 +1591,7 @@ const TRIPS = [
    tbc: true shows a "To be confirmed" label. Add or remove a line.
    --------------------------------------------------------------------- */
 const SUPPORT_CONTACTS = [
-  { title: "Summer school office", detail: "For timetable, group and general questions.", contact: "Email and phone to be confirmed", tbc: true },
+  { title: "General questions", detail: "For timetable, group and general questions. This is the Heriot-Watt Dubai Student Service Centre, on the first floor of campus.", contact: "student-services-dubai@hw.ac.uk, +971 4 571 7000 (ext. 6), Monday to Friday, 09:30 to 19:00", tbc: false },
   { title: "Fees and payments", detail: "For paying your fees, the instalment plan and receipts. This is the Heriot-Watt Dubai finance team.", contact: "finance-services-dubai@hw.ac.uk, +971 4 571 7000 (ext. 4), Monday to Friday, 09:30 to 17:00", tbc: false },
   { title: "Student wellbeing", detail: "If you feel stressed, worried or unwell, the Heriot-Watt Dubai wellbeing team is there to talk in confidence. It isn't an emergency service: in a crisis, go to your nearest emergency room.", contact: "dubaiwellbeing@hw.ac.uk", tbc: false },
   { title: "IT help", detail: "For login, Wi-Fi and software problems. This is the Heriot-Watt Dubai IT helpdesk.", contact: "DubaiISHelp@hw.ac.uk, +971 4 571 7000 (ext. 5), Library, Level 2", tbc: false },
@@ -1604,8 +1604,9 @@ const SUPPORT_CONTACTS = [
    --------------------------------------------------------------------- */
 const SUPPORT_QUESTIONS = [
   { question: "Can I change my class times?", answer: "Yes. Go to My timetable and select “Change my class times”." },
-  { question: "Can I change my group?", answer: "Your group comes from your survey answers. If it feels wrong for you, talk to the summer school office in your first week." },
-  { question: "What happens if I miss a class?", answer: "Attendance is recorded every class day. Tell the summer school office, then catch up using your group's materials." },
+  { question: "Can I change my group?", answer: "Your group comes from your survey answers. If it feels wrong for you, contact the Student Service Centre (see Who to contact) in your first week." },
+  { question: "What happens if I miss a class?", answer: "Attendance is recorded every class day. Tell the Student Service Centre (see Who to contact), then catch up using your group's materials." },
+  { question: "How do I get to campus?", answer: "Open Getting to campus in the menu. It has the address, a map, the ways to get here by public transport and the free metro shuttle times." },
   { question: "Am I allowed to use AI tools?", answer: "Yes, when your assignment instructions allow it. Check the facts, do your own thinking and say clearly how you used AI." },
   { question: "Are extra classes and multisport compulsory?", answer: "No. They are optional, but they are a great way to build confidence and meet people." },
   { question: "Who can see my survey answers?", answer: "Your answers are saved securely online with your account. Only you and the summer school professors can see them." },
@@ -1695,7 +1696,7 @@ const AI_SECTION = {
    Move a page: move its name up or down the list.
    Hide a page: delete its name, or put // in front of its line.
    Available names: "home", "timetable", "schedule", "help", "week", "materials",
-   "fees", "activities", "support", "book", "ai".
+   "fees", "activities", "campus", "support", "book", "ai".
    Pages from EXTRA_SECTIONS are added after these automatically.
    --------------------------------------------------------------------- */
 const PORTAL_SECTIONS = [
@@ -1707,6 +1708,7 @@ const PORTAL_SECTIONS = [
   "materials",
   "fees",
   "activities",
+  "campus",
   "support",
   "book",
   "ai",
@@ -1734,6 +1736,35 @@ const HOME_BANNERS = [
 
 
 /* ---------------------------------------------------------------------
+   CAMPUS: the "Getting to campus" page. Where the campus is, the ways to
+   get there by public transport and the free metro shuttle times.
+   Details are from Heriot-Watt Dubai's Maps and directions and Transport
+   and Parking pages, and the Semester 1 metro shuttle timetable.
+   mapUrl:   opens the campus in Google Maps.
+   mapEmbed: the small map shown on the page. Use "" to hide it.
+   shuttleFromMetro / shuttleFromCampus: departure times (24-hour clock).
+   Update the times if the summer timetable is different.
+   --------------------------------------------------------------------- */
+const CAMPUS = {
+  name: "Heriot-Watt University Dubai",
+  address: ["Dubai Knowledge Park", "Dubai, United Arab Emirates"],
+  phone: "+971 4 571 7000",
+  mapUrl: "https://www.google.com/maps/search/?api=1&query=25.099495,55.161082",
+  mapEmbed: "https://www.google.com/maps?q=25.099495,55.161082&z=15&output=embed",
+  transportIntro: "There are several ways to get to campus by public transport. The best one for you depends on where you live, so plan your route before your first day. Google Maps or the RTA's S'hail app will show you the quickest way from your home.",
+  routes: [
+    { title: "Metro and the free shuttle", text: "Take the Dubai Metro to Dubai Internet City (DIC) station. The university's free shuttle bus runs between the station and campus. It picks you up near the roundabout between Two Seasons Hotel and Jewel Tower, on the metro side, and drops you at the bus parking beside the sports field." },
+    { title: "Tram", text: "Take the tram from Sobha Realty metro station to the Knowledge Village 1 tram stop, then walk to campus." },
+    { title: "Bus", text: "RTA buses 83, 84, 88 and F59 stop near campus. If the shuttle is full, take bus F59 instead." },
+    { title: "Car or taxi", text: "Parking in Dubai Knowledge Park is run by the RTA and you pay for it, so the metro or a taxi is often easier." },
+  ],
+  shuttleNote: "These are the shuttle times for Semester 1. The summer times may be different, so check again before summer school starts. The shuttle leaves as soon as it is full, so get there a few minutes early.",
+  shuttleFromMetro: ["08:00", "08:20", "08:40 (2 buses)", "09:00 (2 buses)", "09:20 (2 buses)", "09:40 (2 buses)", "10:00", "10:40", "11:20", "12:00", "12:40", "13:20", "14:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00"],
+  shuttleFromCampus: ["10:20", "11:00", "11:40", "12:20", "13:00", "13:40", "14:20", "15:00", "15:40", "16:20", "17:00", "17:40", "18:20"],
+};
+
+
+/* ---------------------------------------------------------------------
    EXTRA_SECTIONS: your own sections, added to the end of the portal.
    Each entry automatically gets its own section, menu button and line
    in "Where is what".
@@ -1748,18 +1779,6 @@ const HOME_BANNERS = [
    The entry below is an EXAMPLE. Edit it or delete it.
    --------------------------------------------------------------------- */
 const EXTRA_SECTIONS = [
-  {
-    id: "getting-here",
-    menuLabel: "Getting here",
-    title: "Getting to campus",
-    summary: "Directions and travel tips for your first day.",
-    paragraphs: [
-      "Directions, parking and public transport details will appear here before summer school starts.",
-      "On your first day, arrive 20 minutes early so you have time to find your room.",
-    ],
-    bullets: [],
-    link: { label: "Open the campus map", url: "" },
-  },
 ];
 
 
@@ -2065,6 +2084,7 @@ const TEXT = {
       materials:  { menu: "Materials",             title: "Materials for the {level} group", summary: "Slides, readings and worksheets for your group." },
       fees:       { menu: "Fees",                  title: "Fees and payments",           summary: "What summer school costs and how to pay." },
       activities: { menu: "Activities",            title: "Student activities",          summary: "Competitions, workshops, events and the trip." },
+      campus:     { menu: "Getting to campus",     title: "Getting to campus",           summary: "Where the campus is, how to get there and the free metro shuttle times." },
       support:    { menu: "Support and Q&A",       title: "Support and questions",       summary: "Who to contact, and answers to common questions." },
       book:       { menu: "Book of the week",      title: "Book of the week",            summary: "A recommended read that changes every week." },
       ai:         { menu: "How this portal runs",  title: "How this portal runs",        summary: "How AI agents help run the portal fairly." },
@@ -2137,7 +2157,7 @@ const TEXT = {
     },
     fees: {
       payTitle: "How to pay",
-      payText: "Payment details and deadlines will be sent to your university email by the summer school office.",
+      payText: "Payment details and deadlines will be emailed to you before summer school starts.",
       helpTitle: "Questions about fees?",
       helpButton: "Open Support and Q&A",
       intro: "What summer school costs, what each fee covers, and the credits each course is worth.",
@@ -2178,6 +2198,20 @@ const TEXT = {
       optional: "Optional",
       workshopDay: "Workshops for all students",
       myTimetableButton: "Open my timetable",
+    },
+    campus: {
+      intro: "Summer school takes place at the Heriot-Watt University Dubai campus in Dubai Knowledge Park.",
+      firstDay: "On your first day, arrive 20 minutes early so you have time to find your room.",
+      addressTitle: "Where we are",
+      phoneLine: "Campus reception: +971 4 571 7000",
+      mapButton: "Open in Google Maps",
+      mapTitle: "Map showing the Heriot-Watt University Dubai campus",
+      newTab: "(opens in a new tab)",
+      routesTitle: "Getting here by public transport",
+      shuttleTitle: "Free metro shuttle times",
+      fromMetro: "From DIC Metro Station",
+      fromCampus: "From campus",
+      shuttleFull: "If the shuttle is full, RTA bus F59 runs the same way.",
     },
     support: {
       intro: "You are never on your own here. If anything feels confusing or stressful, reach out.",
@@ -5015,7 +5049,7 @@ function cancelEditing() {
 function portalSections(level) {
   const builders = {
     home: sectionHome, timetable: sectionTimetable, schedule: sectionSchedule, help: sectionHelp, week: sectionWeek, materials: sectionMaterials,
-    fees: sectionFees, activities: sectionActivities, support: sectionSupport, book: sectionBook, ai: sectionAi,
+    fees: sectionFees, activities: sectionActivities, campus: sectionCampus, support: sectionSupport, book: sectionBook, ai: sectionAi,
   };
   const values = { level: level.name };
   const list = [];
@@ -5521,6 +5555,47 @@ function sectionSchedule(sec, ctx) {
     h("p", { class: "muted" }, words.tripsIntro),
     h("ul", { class: "activity-list" }, TRIPS.map(tripItem)),
     h("div", { class: "actions actions-start" }, h("a", { class: "btn btn-secondary", href: "#timetable" }, words.myTimetableButton))
+  );
+}
+
+// Getting to campus: address, map, public transport and the metro shuttle times
+function sectionCampus(sec) {
+  const words = TEXT.portal.campus;
+  const fromMetro = CAMPUS.shuttleFromMetro || [], fromCampus = CAMPUS.shuttleFromCampus || [];
+  const rows = Math.max(fromMetro.length, fromCampus.length);
+  const tableRows = [];
+  for (let i = 0; i < rows; i++) tableRows.push(h("tr", {}, h("td", {}, fromMetro[i] || ""), h("td", {}, fromCampus[i] || "")));
+  return sectionWrap(sec, null,
+    h("p", { class: "lead" }, words.intro),
+    h("p", {}, words.firstDay),
+    h("div", { class: "card-grid" },
+      h("article", { class: "mini-card" },
+        h("h2", { class: "mini-title" }, words.addressTitle),
+        h("p", { style: "margin-bottom:4px" }, h("strong", {}, CAMPUS.name)),
+        CAMPUS.address.map(function (line) { return h("p", { style: "margin:0" }, line); }),
+        h("p", { class: "small muted", style: "margin-top:10px" }, linkify(words.phoneLine)),
+        h("div", { class: "card-actions" },
+          h("a", { class: "btn btn-primary btn-small", href: CAMPUS.mapUrl, target: "_blank", rel: "noopener" },
+            words.mapButton, h("span", { class: "visually-hidden" }, " " + words.newTab)))
+      ),
+      CAMPUS.mapEmbed ? h("article", { class: "mini-card", style: "padding:0;overflow:hidden;min-height:260px" },
+        h("iframe", { src: CAMPUS.mapEmbed, title: words.mapTitle, loading: "lazy", referrerpolicy: "no-referrer-when-downgrade",
+          style: "width:100%;height:100%;min-height:260px;border:0;display:block" })) : null
+    ),
+    h("h2", { style: "margin-top:28px" }, words.routesTitle),
+    h("p", { class: "muted" }, CAMPUS.transportIntro),
+    h("div", { class: "card-grid" }, CAMPUS.routes.map(function (r) {
+      return h("article", { class: "mini-card" }, h("h3", { class: "mini-title" }, r.title), h("p", {}, r.text));
+    })),
+    rows ? [
+      h("h2", { style: "margin-top:28px" }, words.shuttleTitle),
+      h("p", { class: "muted" }, CAMPUS.shuttleNote),
+      h("div", { class: "table-wrap" },
+        h("table", { class: "fee-table" },
+          h("thead", {}, h("tr", {}, h("th", { scope: "col" }, words.fromMetro), h("th", { scope: "col" }, words.fromCampus))),
+          h("tbody", {}, tableRows))),
+      h("p", { class: "small muted", style: "margin-top:8px" }, words.shuttleFull)
+    ] : null
   );
 }
 
@@ -6496,6 +6571,10 @@ const ASSISTANT_INTENTS = [
       const exams = THIS_WEEK.examReminders.filter(function (e) { return ctx.levels.some(function (l) { return includesLevel(e, l); }); });
       return { text: exams.length ? "Exams and quizzes for your group:\n\n" + aList(exams.map(function (e) { return e.title + ": " + e.when; })) : "There are no exams or quizzes listed for your group yet." };
     } },
+  { id: "campus", test: function (t) { return aHas(t, ["shuttle", "metro", "tram", "parking", "directions", "get to campus", "get to the campus", "where is the campus", "where is campus", "campus location", "campus address", "public transport"]); },
+    answer: function () { return { text: "Getting to campus:\n\n" + CAMPUS.name + ", " + CAMPUS.address.join(", ") + ".\nMap: " + CAMPUS.mapUrl + "\n\n" +
+      aList(CAMPUS.routes.map(function (r) { return r.title + ": " + r.text; })) +
+      "\n\nFree shuttle from DIC Metro Station: " + CAMPUS.shuttleFromMetro.join(", ") + ".\nFree shuttle from campus: " + CAMPUS.shuttleFromCampus.join(", ") + ".\n\n" + CAMPUS.shuttleNote }; } },
   { id: "contacts", test: function (t) { return aHas(t, ["wellbeing", "well-being", "counsel", "stress", "mental", "it help", "wifi", "wi-fi", "contact", "office", "phone number", "who do i call", "who should i contact"]); },
     answer: function () { return { text: "Support contacts:\n\n" + aList(SUPPORT_CONTACTS.map(function (c) { return c.title + ": " + c.detail + " " + c.contact + "."; })) }; } },
   { id: "support", test: function (t) { return aHas(t, ["support", "struggl", "at risk", "behind", "lowest", "need help", "needs help", "falling", "weak student", "attention", "worried about", "concern"]); },
